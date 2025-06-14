@@ -17,6 +17,6 @@ A scalable, automation-driven solution designed to streamline **order processing
 
 ## 🔧 Installation  
 ```bash
-git clone https://github.com/Stefodan21/Order_fulfillment_Project.git
+git clone https://github.com/Stefodan21/Order_fullfillment_Project
 cd OrderFulfillment_Project
 npm install  # If applicable
