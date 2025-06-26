@@ -4,7 +4,11 @@ import json
 def lambda_handler(event, _):
     # Parse input from API Gateway (assumes JSON body)
     try:
-        body = json.loads(event['body'])
+        if isinstance(event.get("body"), str):
+            body = json.loads(event["body"])
+        else:
+            body = event.get("body", {})
+
 
     except (KeyError, json.JSONDecodeError) as e:
         print(f"Error: Unable to parse input. {e}")
