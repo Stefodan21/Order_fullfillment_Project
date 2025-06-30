@@ -7,6 +7,10 @@ from ShippingSuggestion.ShippingSuggestion import lambda_handler as shipping_han
 
 api = Flask(__name__)
 
+@api.route('/')
+def home():
+    return 'Order Fulfillment API is running!'
+
 @api.route('/order_validation', methods=['POST'])
 def validate():
     event = {'body': request.json}
