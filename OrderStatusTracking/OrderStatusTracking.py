@@ -46,9 +46,10 @@ def lambda_handler(event, context):
 
     if not tracking_info:
         return {
-            'statusCode': 404,
-        "carrier": tracking_info.courier.name if tracking_info.courier and hasattr(tracking_info.courier, 'name') else "Unknown",
+        'statusCode': 404,
+        'body': json.dumps({'error': 'Tracking number not found or unrecognized'})
         }
+
 
     # Prepare response with extracted details
     order_status = {

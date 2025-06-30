@@ -22,12 +22,16 @@ def gen_invoice():
 @api.route('/ShippingSuggestion', methods=['POST'])
 def shipping_suggestion():
     event = {'body': request.json}
-    return jsonify(shipping_handler(event, None))
+    result = shipping_handler(event, None)
+    return jsonify(json.loads(result['body'])), result['statusCode']
+
 
 @api.route('/OrderStatusTracking', methods=['POST'])
 def track_status():
     event = {'body': request.json}
-    return jsonify(tracking_handler(event, None))
+    result = tracking_handler(event, None)
+    return jsonify(json.loads(result['body'])), result['statusCode']
+
 
 if __name__ == '__main__':
     api.run(debug=True)
