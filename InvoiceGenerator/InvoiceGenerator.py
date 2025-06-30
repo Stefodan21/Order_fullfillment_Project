@@ -4,22 +4,18 @@ import uuid
 from fpdf import FPDF
 import io
 import json
+from utils.parser import parse_event_body
+from utils.response import response
 
 # This script generates an invoice in PDF format and stores it in an S3 bucket
 # This function is used to place an invoice in the S3 bucket and update the DynamoDB table
 
 def lambda_handler(event, context):
     
-    # Parse input from API Gateway (assumes JSON body)
-    try:
-        body = json.loads(event['body'])
-        status = body.get('status', 'Pending')  # Default to 'Pending' if not provided
-    except (KeyError, json.JSONDecodeError) as e:
-        print(f"Error: Unable to parse input. {e}")
-        return {
-            'statusCode': 400,
-            'body': json.dumps({'error': 'Invalid input'})
-        }
+    # gets input from event parser (assumes JSON body)
+    body = parse_event_body(event)
+    if not body:
+        return response(400, {'error': 'Invalid input'})
     
     customer_name = body.get('customer_name', 'Unknown')  # Default to 'Unknown' if not provided
     customer_address = body.get('customer_address', 'Unknown')
@@ -110,15 +106,9 @@ def lambda_handler(event, context):
         print(f"Invoice uploaded to S3: {bucket_name}/{invoice_file_path}")
     except Exception as e:
         print(f"Error: Unable to upload the invoice to S3. {e}")
-        return {
-            'statusCode': 500,
-            'body': json.dumps({'error': 'Failed to upload invoice to S3'})
-        }
+        return response(500, {'error': 'Failed to upload invoice to S3'})
 
-    return {
-        'statusCode': 200,
-        'body': json.dumps({'message': 'Invoice generated and uploaded successfully', 'invoice_path': invoice_file_path})
-    }
+    return response(200, {'message': 'Invoice generated and uploaded successfully', 'invoice_path': invoice_file_path})
 
 
 

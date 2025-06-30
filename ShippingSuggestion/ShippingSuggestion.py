@@ -1,43 +1,31 @@
 import json
 from tracking_numbers import get_tracking_number
+from utils.parser import parse_event_body
+from utils.response import response
 
 def lambda_handler(event, context):
 
     """
     AWS Lambda function that generates a shipping suggestion based on the provided tracking number.
     """
-    try:
-        # Safely parse JSON body
-        body = json.loads(event.get('body', '{}'))
-
-    except json.JSONDecodeError as e:
-        return {
-            'statusCode': 400,
-            'body': json.dumps({'error': 'Invalid JSON input', 'details': str(e)})
-        }
+    body = parse_event_body(event)
+    if not body:
+        return response(400, {'error': 'Invalid input'})
+    
     if "tracking_number" not in body:
-        return {
-            'statusCode': 400,
-            'body': json.dumps({'error': 'Missing "tracking_number" key in the request body'})
-        }   
+        return response(400, {'error': 'Missing tracking number'})
+  
     tracking_number = body["tracking_number"]
     if not tracking_number or not isinstance(tracking_number, str):
-        return {
-            'statusCode': 400,
-            'body': json.dumps({'error': 'Invalid or missing tracking number'})
-        }
+        return response(400, {'error': 'Invalid or missing tracking number'})
+        
     weight = body.get("weight")
     if not weight or not isinstance(weight, (int, float)):
-        return {
-            'statusCode': 400,
-            'body': json.dumps({'error': 'Invalid or missing weight'})
-        }
+        return response(400, {'error': 'Invalid or missing weight'})
+        
     destination = body.get("destination")
     if not destination or not isinstance(destination, str):
-        return {
-            'statusCode': 400,
-            'body': json.dumps({'error': 'Invalid or missing destination'})
-        }
+        return response(400, {'error': 'Invalid or missing destination'})
     # Validate tracking number
     tracking_info = get_tracking_number(tracking_number)
     carrier = tracking_info.courier.name if tracking_info and tracking_info.courier else "Unknown"
