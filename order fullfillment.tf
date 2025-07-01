@@ -119,31 +119,40 @@ resource "aws_s3_bucket_lifecycle_configuration" "invoice_storage_lifecycle" {
 
 
 // For storing the information in dynamodb
-resource "aws_dynamodb_table" "OrderDetails" {
-    name         = "OrderDetails"
-    billing_mode = "PAY_PER_REQUEST"
-    hash_key     = "order_id"
-    range_key    = "OrderedAt" 
-    global_secondary_index {
-        name = "OrderedAt-index"
-        hash_key = "OrderedAt"
-        projection_type = "ALL"
-    }
-    // uses timestmap as sort key
-    attribute {
-        name = "order_id"
-        type = "S"
-    }
-    attribute {
-        name = "Arrived"
-        type = "S"
-    }
-    attribute {
-        name = "OrderedAt"
-        type = "S"
-    }
-}
+resource "aws_dynamodb_table" "CustomerDetails" {
+  name         = "CustomerDetails"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "customer_name"
+  range_key    = "OrderedAt"
 
+  attribute {
+    name = "customer_name"
+    type = "S"
+  }
+
+  attribute {
+    name = "OrderedAt"
+    type = "S"
+  }
+
+  # Optional: to support order_id lookups
+  attribute {
+    name = "order_id"
+    type = "S"
+  }
+
+  # Optional: GSI if you want to query by order_id one day
+  global_secondary_index {
+    name            = "order_id-index"
+    hash_key        = "order_id"
+    projection_type = "ALL"
+  }
+
+  tags = {
+    Environment = "dev"
+    Project     = "OrderFulfillment"
+  }
+}
 
 
 

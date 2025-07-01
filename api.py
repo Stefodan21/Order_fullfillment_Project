@@ -18,7 +18,7 @@ def validate():
     result = validation_handler(event, None)
     return jsonify(json.loads(result['body'])), result['statusCode']
 
-@api.route('/invoiceGenerator', methods=['GET'])
+@api.route('/invoiceGenerator', methods=['POST'])
 def gen_invoice():
     event = {"body": request.json}
     return jsonify(invoice_handler(event, None))

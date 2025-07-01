@@ -6,6 +6,7 @@ import io
 import json
 from utils.parser import parse_event_body
 from utils.response import response
+from boto3.dynamodb.conditions import Key
 
 # This script generates an invoice in PDF format and stores it in an S3 bucket
 # This function is used to place an invoice in the S3 bucket and update the DynamoDB table
@@ -16,7 +17,8 @@ def lambda_handler(event, context):
     body = parse_event_body(event)
     if not body:
         return response(400, {'error': 'Invalid input'})
-    
+# ... other parsing logic
+
     customer_name = body.get('customer_name', 'Unknown')  # Default to 'Unknown' if not provided
     customer_address = body.get('customer_address', 'Unknown')
     business_name = body.get('business_name', 'Unknown')
@@ -27,7 +29,7 @@ def lambda_handler(event, context):
     # Initialize AWS resources
     s3 = boto3.resource('s3')
     dynamodb = boto3.resource('dynamodb')
-    bucket_name = 'invoicestorage'
+    bucket_name = 'invoicestorage-ofp'
     table_name = 'OrderDetails'
     table = dynamodb.Table(table_name)
 
@@ -37,37 +39,40 @@ def lambda_handler(event, context):
     orderedAt = str(datetime.now().isoformat() + "Z")
 
     item = {
+        'customer_name': customer_name, # The name of the customer
         'order_id': OrderID,      # The unique ID for this order
         'OrderedAt': orderedAt,   # The timestamp when the order was created
         # 'Arrived': status,      # (Optional) Status of the order, currently commented out
     }
 
     table.put_item(Item=item)
+    
+    inserted_item = {
+    "customer_name": customer_name,
+    "order_id": OrderID,
+    "OrderedAt": orderedAt
+    }
+    table.put_item(Item=inserted_item)
 
     # It retrieves the latest item from the table and constructs the invoice file name
     # gets the latest item from the DynamoDB table
     try:
         response = table.query(
-            IndexName='OrderedAt-index',  # Use the index to query by OrderedAt
-            ScanIndexForward=False,      # Retrieve items in descending order
-            Limit=1                      # Limit to the most recent item
+        KeyConditionExpression=Key("customer_name").eq(customer_name),
+        ScanIndexForward=False,
+        Limit=1,
+        ConsistentRead=True
         )
-        if 'Items' in response and response['Items']:
-            latest_item = response['Items'][0]
-        else:
-            latest_item = None
+        items = response.get("Items", [])
+        latest_item = items[0] if items else item  # fallback to inserted item
     except Exception as e:
-        print(f"Error: Unable to find the latest item in the table. {e}")
-        latest_item = None
+        print(f"Error: Fallback to inserted item. {e}")
+        latest_item = item
 
-    if not latest_item:
-        return {
-            'statusCode': 500,
-            'body': json.dumps({'error': 'Could not retrieve latest order'})
-        }
+
 
     invoice_file_name_str = f"invoice_{latest_item['order_id']}_{latest_item['OrderedAt']}.pdf"
-    invoice_file_path = f"invoicestorage/{invoice_file_name_str}"
+    invoice_file_path = f"invoicestorage-ofp/{invoice_file_name_str}"
 
     # Creates a PDF file for the invoice
     pdf = FPDF()  
@@ -91,10 +96,10 @@ def lambda_handler(event, context):
     pdf.cell(200, 10, txt=f"Total Amount: ${item_price * item_quantity:.2f}", ln=True)
     pdf.cell(200, 10, txt=" ", ln=True)  # Blank line
 
-    # Save PDF to a bytes buffer
-    pdf_buffer = io.BytesIO()
-    pdf.output(pdf_buffer)
-    pdf_buffer.seek(0)
+    # ✅ Generate PDF as a string and wrap in BytesIO
+    pdf_bytes = pdf.output(dest='S').encode('latin1')  # 'latin1' ensures compatibility
+    pdf_buffer = io.BytesIO(pdf_bytes)
+
 
     # Upload the PDF to S3
     try:
