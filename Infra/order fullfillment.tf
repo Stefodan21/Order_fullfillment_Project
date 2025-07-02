@@ -1,14 +1,4 @@
-terraform {
-    required_providers {
-        aws = {
-            source = "hashicorp/aws"
-        }
-    }
-}
 
-provider "aws" {
-    region = "us-east-1"
-}
 // api gateway for order processing
 resource "aws_api_gateway_rest_api" "OrderProcessingAPI" {
     name = "OrderProcessingAPI"
@@ -114,8 +104,8 @@ resource "aws_lambda_function" "order_status_tracking" {
 }  
 
 // s3 bucket for invoice storage
-resource "aws_s3_bucket" "invoice_storage" {
-    bucket = "invoicestorage"
+resource "aws_s3_bucket" "invoice_storage_ofp" {
+    bucket = "invoicestorage-ofp"
     lifecycle {
         prevent_destroy = true
     }
@@ -124,7 +114,7 @@ resource "aws_s3_bucket" "invoice_storage" {
 
 // s3 removes invoices after 1 year
 resource "aws_s3_bucket_lifecycle_configuration" "invoice_storage_lifecycle" {
-    bucket = aws_s3_bucket.invoice_storage.id
+    bucket = aws_s3_bucket.invoice_storage_ofp.id
     rule {
         id   = "expire_old_invoices"
         status = "Enabled"      

@@ -30,9 +30,8 @@ def lambda_handler(event, context):
     s3 = boto3.resource('s3')
     dynamodb = boto3.resource('dynamodb')
     bucket_name = 'invoicestorage-ofp'
-    table_name = 'OrderDetails'
+    table_name = 'CustomerDetails'
     table = dynamodb.Table(table_name)
-
     # It generates a unique order ID, invoice number, and timestamp, and stores them in the DynamoDB table
     invnum = str(uuid.uuid4())
     OrderID = str(uuid.uuid4())
@@ -45,16 +44,7 @@ def lambda_handler(event, context):
         # 'Arrived': status,      # (Optional) Status of the order, currently commented out
     }
 
-    table.put_item(Item=item)
-    
-    inserted_item = {
-    "customer_name": customer_name,
-    "order_id": OrderID,
-    "OrderedAt": orderedAt
-    }
-    table.put_item(Item=inserted_item)
-
-    # It retrieves the latest item from the table and constructs the invoice file name
+    table.put_item(Item=item)    # It retrieves the latest item from the table and constructs the invoice file name
     # gets the latest item from the DynamoDB table
     try:
         response = table.query(
@@ -72,8 +62,7 @@ def lambda_handler(event, context):
 
 
     invoice_file_name_str = f"invoice_{latest_item['order_id']}_{latest_item['OrderedAt']}.pdf"
-    invoice_file_path = f"invoicestorage-ofp/{invoice_file_name_str}"
-
+    invoice_file_path = invoice_file_name_str
     # Creates a PDF file for the invoice
     pdf = FPDF()  
     pdf.add_page()
