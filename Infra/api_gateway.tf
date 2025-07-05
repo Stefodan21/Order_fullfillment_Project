@@ -26,3 +26,5 @@ resource "aws_api_gateway_resource" "OrderProcessingResource" {
     parent_id   = aws_api_gateway_rest_api.OrderProcessingAPI.root_resource_id
     path_part   = "processOrder"
     }
+
+

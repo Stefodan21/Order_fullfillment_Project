@@ -21,7 +21,8 @@ def validate():
 @api.route('/invoiceGenerator', methods=['POST'])
 def gen_invoice():
     event = {"body": request.json}
-    return jsonify(invoice_handler(event, None))
+    result = invoice_handler(event, None)
+    return jsonify(json.loads(result['body'])), result['statusCode']
 
 @api.route('/ShippingSuggestion', methods=['POST'])
 def shipping_suggestion():

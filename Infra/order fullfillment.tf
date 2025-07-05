@@ -126,10 +126,10 @@ resource "aws_s3_bucket_lifecycle_configuration" "invoice_storage_lifecycle" {
 
 
 // For storing the information in dynamodb
-resource "aws_dynamodb_table" "CustomerDetails" {
-  name         = "CustomerDetails"
+resource "aws_dynamodb_table" "OrderDetails" {
+  name         = "OrderDetails"
   billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "customer_name"
+  hash_key     = "order_id"
   range_key    = "OrderedAt"
 
   attribute {

@@ -7,9 +7,11 @@ import json
 from utils.parser import parse_event_body
 from utils.response import response
 from boto3.dynamodb.conditions import Key
+import os
 
 # This script generates an invoice in PDF format and stores it in an S3 bucket
 # This function is used to place an invoice in the S3 bucket and update the DynamoDB table
+
 
 def lambda_handler(event, context):
     
@@ -24,13 +26,14 @@ def lambda_handler(event, context):
     business_name = body.get('business_name', 'Unknown')
     item_bought = body.get('item_purchased','Unknown') # Default to 'Unknown' if not provided
     item_price = body.get('item_price', 0) # Default to 0 if not provided
-    item_quantity = body.get('item_quantity', 1) # Default to 1 if not provided
-
+    item_quantity = body.get('item_quantity', 1)
+    status = body.get('status', 'pending')  # Default to 'pending' if not provided
+    
     # Initialize AWS resources
     s3 = boto3.resource('s3')
     dynamodb = boto3.resource('dynamodb')
     bucket_name = 'invoicestorage-ofp'
-    table_name = 'CustomerDetails'
+    table_name = 'OrderDetails'
     table = dynamodb.Table(table_name)
     # It generates a unique order ID, invoice number, and timestamp, and stores them in the DynamoDB table
     invnum = str(uuid.uuid4())
@@ -47,13 +50,13 @@ def lambda_handler(event, context):
     table.put_item(Item=item)    # It retrieves the latest item from the table and constructs the invoice file name
     # gets the latest item from the DynamoDB table
     try:
-        response = table.query(
-        KeyConditionExpression=Key("customer_name").eq(customer_name),
+        dbresponse = table.query(
+        KeyConditionExpression=Key("order_id").eq(OrderID),
         ScanIndexForward=False,
         Limit=1,
         ConsistentRead=True
         )
-        items = response.get("Items", [])
+        items = dbresponse.get("Items", [])
         latest_item = items[0] if items else item  # fallback to inserted item
     except Exception as e:
         print(f"Error: Fallback to inserted item. {e}")
@@ -62,9 +65,11 @@ def lambda_handler(event, context):
 
 
     invoice_file_name_str = f"invoice_{latest_item['order_id']}_{latest_item['OrderedAt']}.pdf"
-    invoice_file_path = invoice_file_name_str
+    invoice_file_path = f"{bucket_name}/{invoice_file_name_str}"  # Path in S3 bucket
     # Creates a PDF file for the invoice
-    pdf = FPDF()  
+    pdf = FPDF( orientation="portrait",
+        unit="mm",
+        format="A4")  
     pdf.add_page()
     pdf.set_font("Arial", size=12)
     # Adds content to the PDF
@@ -84,6 +89,16 @@ def lambda_handler(event, context):
     pdf.cell(200, 10, txt=f"Item Quantity: {item_quantity}", ln=True)
     pdf.cell(200, 10, txt=f"Total Amount: ${item_price * item_quantity:.2f}", ln=True)
     pdf.cell(200, 10, txt=" ", ln=True)  # Blank line
+    
+    # Adding a folder to test the create of tghe inovice pdf
+    # Create the folder if it doesn’t exist
+    output_dir = "invoices"
+    os.makedirs(output_dir, exist_ok=True)
+    # Save the PDF to that folder
+    file_path = os.path.join(output_dir, f"invoice.pdf")
+    pdf.output(file_path)
+    print(f"Invoice saved to: {file_path}")
+    
 
     # ✅ Generate PDF as a string and wrap in BytesIO
     pdf_bytes = pdf.output(dest='S').encode('latin1')  # 'latin1' ensures compatibility
