@@ -25,6 +25,9 @@ pytest-mock==3.10.0
 pytest-xdist==3.4.0
 requests==2.31.0
 s3transfer==0.13.0
-
+tracking-numbers==0.1.0
+tomli==2.0.1
+tqdm==4.66.1
+typing-extensions==4.11.0
 urllib3==2.5.0
 virtualenv==20.31.2
