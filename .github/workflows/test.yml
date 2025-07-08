@@ -32,5 +32,3 @@ jobs:
 
       - name: Run tests
         run: PYTHONPATH=. pytest tests/
-        env:
-          AWS_DEFAULT_REGION: us-east-1
