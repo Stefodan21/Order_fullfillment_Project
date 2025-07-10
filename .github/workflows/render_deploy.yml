@@ -1,0 +1,16 @@
+name: Deploy to Render After Tests Pass
+
+on:
+  pull_request:
+    branches:
+      - render_deploy
+
+jobs:
+  deploy-to-render:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger Render Deploy Hook
+        run: |
+          curl -X POST https://api.render.com/deploy/${{ secrets.RENDER_DEPLOY_HOOK }}
