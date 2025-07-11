@@ -1,7 +1,7 @@
 name: Deploy to Render After Tests Pass
 
 on:
-  pull_request:
+  pull_request: 
     branches:
       - render_deploy
 
