@@ -9,7 +9,31 @@ api = Flask(__name__)
 
 @api.route('/')
 def home():
-    return 'Order Fulfillment API is running!'
+    return """
+    <html>
+        <head>
+            <title>Order Fulfillment API</title>
+            <style>
+                body { font-family: sans-serif; background-color: #f9f9f9; padding: 40px; }
+                h1 { color: #333; }
+                code { background: #eee; padding: 4px 6px; border-radius: 4px; }
+                a { color: #007bff; text-decoration: none; }
+            </style>
+        </head>
+        <body>
+            <h1>🚀 Order Fulfillment API is Running!</h1>
+            <p>Welcome to the microservice hub for validation, invoices, shipping suggestions, and tracking.</p>
+            <h3>Available Endpoints:</h3>
+            <ul>
+                <li><code>POST /order_validation</code></li>
+                <li><code>POST /invoiceGenerator</code></li>
+                <li><code>POST /ShippingSuggestion</code></li>
+                <li><code>POST /OrderStatusTracking</code></li>
+            </ul>
+            <p>See the <a href="https://github.com/Stefodan21/Order_fullfillment_Project" target="_blank">GitHub repository</a> for usage details.</p>
+        </body>
+    </html>
+    """
 
 @api.route('/order_validation', methods=['POST'])
 def validate():
