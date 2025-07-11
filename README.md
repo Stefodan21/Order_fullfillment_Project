@@ -1,8 +1,19 @@
 # 🚀 Order Fulfillment & Tracking System  
 **Python-based | Miami, Florida • May 2025**  
 
+
 ## 🔍 Overview  
 Order_fullfillment_Project is a cloud-native, scalable solution to automate and streamline order processing, validation, invoice generation, and real-time tracking. Leveraging AWS Lambda, Step Functions, DynamoDB, and Terraform, it provides an efficient backend for shipping and order management. The project features modular Flask APIs, Dockerized development, and robust CI/CD pipelines using GitHub Actions and Pytest.
+
+---
+
+## 🧊 Render Free Tier Notice
+
+This app is hosted on [Render](https://render.com) using the **free instance tier**, which may introduce a delay of **up to ~50 seconds** on first access after idle periods.
+
+> Render services spin down after ~15 minutes of inactivity to conserve resources. When a new request arrives, the instance wakes up and boots the app before responding.
+
+---
 
 **Homepage:** [Order Fullfillment Project Live](https://order-fullfillment-project.onrender.com)  
 **Repository:** [GitHub](https://github.com/Stefodan21/Order_fullfillment_Project)  
