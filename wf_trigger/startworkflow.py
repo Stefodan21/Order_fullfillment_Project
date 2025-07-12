@@ -1,4 +1,5 @@
-import boto3, json
+import boto3 
+import json
 import os
 
 def lambda_handler(event, context):
