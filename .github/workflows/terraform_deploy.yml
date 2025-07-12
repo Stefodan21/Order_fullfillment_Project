@@ -39,11 +39,11 @@ jobs:
           }
 
 
-          zip_lambda "wf_trigger" "startworkflow.py" "start_workflow"
-          zip_lambda "lambda/OrderValidation" "order_validation.py" "order_validation"
-          zip_lambda "lambda/InvoiceGenerator" "InvoiceGenerator.py" "invoice_generator"
-          zip_lambda "lambda/ShippingSuggestion" "ShippingSuggestion.py" "shipping_suggestion"
-          zip_lambda "lambda/OrderStatusTracking" "OrderStatusTracking.py" "order_status_tracking"
+          zip_lambda "wf_trigger" "workflow.py" "start_workflow"
+          zip_lambda "lambda/OrderValidation" "order_validation.py" "./requirements.txt"
+          zip_lambda "lambda/InvoiceGenerator" "InvoiceGenerator.py" "./requirements.txt"
+          zip_lambda "lambda/ShippingSuggestion" "ShippingSuggestion.py" "./requirements.txt"
+          zip_lambda "lambda/OrderStatusTracking" "OrderStatusTracking.py" "./requirements.txt"
 
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v3
@@ -64,7 +64,7 @@ jobs:
         working-directory: Infra
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve -var="region=${{ secrets.AWS_REGION }}" -var="environment=${{ secrets.ENVIRONMENT }}" -var="project_name=${{ secrets.PROJECT_NAME }}"
+        run: terraform apply -auto-approve -var="region=${{ secrets.AWS_REGION }}"
         working-directory: Infra
 
       - name: Notify Deployment Success

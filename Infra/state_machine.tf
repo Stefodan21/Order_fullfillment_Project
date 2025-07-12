@@ -1,7 +1,7 @@
 // workflow outline 
 resource "aws_sfn_state_machine" "OrderFullfillment" {
-  name     = "${var.project_name}-${var.environment}"
-  role_arn = aws_iam_role.StepFunctionTriggerRole.arn
+  name     = "OrderProcessing"
+  role_arn = "arn:aws:iam::478517495734:role/Order_fullfillment_project_user.StepFunctionRole"
 
   definition = <<EOF
 {
