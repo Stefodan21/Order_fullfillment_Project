@@ -1,7 +1,21 @@
-output "api_url" {
-  value = aws_api_gateway_deployment.OrderProcessingDeployment.invoke_url
+output "order_api_url" {
+  value = "https://${aws_api_gateway_rest_api.OrderProcessingAPI.id}.execute-api.${var.region}.amazonaws.com/${aws_api_gateway_stage.OrderProcessingStage.stage_name}/processOrder"
+}
+output "start_workflow_url" {
+  value = "${output.api_base_url}/startWorkflow"
+}
+output "validate_order_url" {
+  value = "${output.api_base_url}/validateOrder"
 }
 
-output "s3_bucket" {
-  value = aws_s3_bucket.invoice_storage_ofp.bucket
+output "generate_invoice_url" {
+  value = "${output.api_base_url}/generateInvoice"
+}
+
+output "suggest_shipping_url" {
+  value = "${output.api_base_url}/suggestShipping"
+}
+
+output "track_order_url" {
+  value = "${output.api_base_url}/trackOrder"
 }

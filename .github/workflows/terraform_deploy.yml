@@ -13,6 +13,38 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Zip Lambda functions and dependencies
+        run: |
+          zip_lambda() {
+            FUNC_DIR=$1
+            FUNC_FILE=$2
+            ZIP_NAME=$3
+            BUILD_DIR="./build"
+
+            echo "📦 Zipping $FUNC_FILE into $ZIP_NAME.zip..."
+            mkdir -p $BUILD_DIR
+            cp "$FUNC_DIR/$FUNC_FILE" $BUILD_DIR/
+
+            if [ -f "./requirements.txt" ]; then
+            pip install -r "./requirements.txt" -t $BUILD_DIR/
+            fi
+
+            cd $BUILD_DIR && zip -r "../Infra/${ZIP_NAME}.zip" . && cd ..
+            rm -rf $BUILD_DIR
+          }
+
+
+          zip_lambda "wf_trigger" "workflow.py" "start_workflow"
+          zip_lambda "lambda/OrderValidation" "order_validation.py" "./requirements.txt"
+          zip_lambda "lambda/InvoiceGenerator" "InvoiceGenerator.py" "./requirements.txt"
+          zip_lambda "lambda/ShippingSuggestion" "ShippingSuggestion.py" "./requirements.txt"
+          zip_lambda "lambda/OrderStatusTracking" "OrderStatusTracking.py" "./requirements.txt"
+
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v3
 
@@ -25,11 +57,15 @@ jobs:
 
       - name: Terraform Init
         run: terraform init
+        working-directory: Infra
 
       - name: Terraform Plan
         run: terraform plan
+        working-directory: Infra
 
       - name: Terraform Apply
-        run: terraform apply -auto-approve
+        run: terraform apply -auto-approve -var="region=${{ secrets.AWS_REGION }}"
+        working-directory: Infra
+
       - name: Notify Deployment Success
         run: echo "Deployment was successful!"
