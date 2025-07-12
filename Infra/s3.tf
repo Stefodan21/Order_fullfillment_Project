@@ -6,6 +6,11 @@ resource "aws_s3_bucket" "invoice_storage_ofp" {
         prevent_destroy = true
     }
 
+    tags = {
+    Environment = var.environment
+    Project     = var.project_name
+  }
+
 }
 
 // s3 removes invoices after 1 year
@@ -19,3 +24,15 @@ resource "aws_s3_bucket_lifecycle_configuration" "invoice_storage_lifecycle" {
         }
     }
 }
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "invoice_storage_encryption" {
+  bucket = aws_s3_bucket.invoice_storage_ofp.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm     = "aws:kms"
+      kms_master_key_id = aws_kms_key.invoice_encryption_key.arn
+    }
+  }
+}
+

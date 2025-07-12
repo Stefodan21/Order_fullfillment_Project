@@ -1,5 +1,3 @@
-// DynamoDB table for storing order details
-// Includes attributes, keys, and optional global secondary index for querying
 resource "aws_dynamodb_table" "OrderDetails" {
   name         = "OrderDetails"
   billing_mode = "PAY_PER_REQUEST"
@@ -16,21 +14,19 @@ resource "aws_dynamodb_table" "OrderDetails" {
     type = "S"
   }
 
-  # Optional: to support order_id lookups
-  attribute {
-    name = "order_id"
-    type = "S"
-  }
-
-  # Optional: GSI if you want to query by order_id one day
   global_secondary_index {
     name            = "order_id-index"
     hash_key        = "order_id"
     projection_type = "ALL"
   }
 
+  server_side_encryption {
+    enabled     = true
+    kms_key_arn = aws_kms_key.data_encryption.arn
+  }
+
   tags = {
-    Environment = "dev"
-    Project     = "OrderFulfillment"
+    Environment = var.environment
+    Project     = var.project_name
   }
 }
