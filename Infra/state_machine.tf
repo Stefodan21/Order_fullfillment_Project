@@ -1,4 +1,5 @@
-// workflow outline 
+// Step Functions state machine for order fulfillment workflow
+// Orchestrates Lambda functions for validation, invoice generation, shipping, and tracking
 resource "aws_sfn_state_machine" "OrderFullfillment" {
   name     = "${var.project_name}-${var.environment}"
   role_arn = aws_iam_role.StepFunctionTriggerRole.arn

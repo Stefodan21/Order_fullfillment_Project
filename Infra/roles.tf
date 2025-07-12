@@ -1,4 +1,5 @@
-// Role for core Lambda functions (validation, invoice, shipping, tracking)
+// IAM roles for Lambda and Step Function execution
+// Defines trust policies and tags for each role
 resource "aws_iam_role" "LambdaExecutionRole" {
   name = "${var.project_name}-${var.environment}-LambdaExecutionRole"
 

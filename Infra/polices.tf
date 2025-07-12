@@ -1,3 +1,5 @@
+// IAM policies for DynamoDB, Lambda, S3, and Step Functions access
+// Each policy grants specific permissions required by the workflow components
 resource "aws_iam_policy" "order_table_access" {
   name        = "AllowOrderTableOperations"
   description = "Policy to allow operations on the Order table in DynamoDB"

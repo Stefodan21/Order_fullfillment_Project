@@ -1,3 +1,5 @@
+// IAM policy attachments for Lambda and Step Function roles
+// This file attaches necessary policies to roles for logging, DynamoDB, and S3 access
 // Attach policies to IAM roles for Lambda Functions
 resource "aws_iam_role_policy_attachment" "lambda_exec_logs" {
   role       = aws_iam_role.LambdaExecutionRole.name

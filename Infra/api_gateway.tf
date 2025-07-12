@@ -1,4 +1,5 @@
-// api gateway for order processing
+// API Gateway resources for order processing
+// This file defines the REST API, endpoints, and integrations for the order fulfillment workflow
 resource "aws_api_gateway_rest_api" "OrderProcessingAPI" {
     name = "${var.project_name}-${var.environment}-OrderProcessingAPI"
     description = "API for ${var.project_name} ${var.environment}"    

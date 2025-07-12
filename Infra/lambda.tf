@@ -1,3 +1,5 @@
+// Lambda function definitions for the order fulfillment workflow
+// Includes functions for starting workflow, order validation, invoice generation, shipping suggestion, and order tracking
 
 resource "aws_lambda_function" "start_workflow" {
   function_name =  "${var.project_name}-${var.environment}-startWorkflow"

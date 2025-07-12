@@ -1,4 +1,5 @@
-// For storing the information in dynamodb
+// DynamoDB table for storing order details
+// Includes attributes, keys, and optional global secondary index for querying
 resource "aws_dynamodb_table" "OrderDetails" {
   name         = "OrderDetails"
   billing_mode = "PAY_PER_REQUEST"

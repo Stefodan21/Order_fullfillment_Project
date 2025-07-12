@@ -10,9 +10,9 @@ output "default_tags" {
   }
 }
 
-# Add a reusable local for the API base URL
-
-# Replace the hard-coded URL in the existing output
+// Output variables for API URLs and default tags
+// These outputs make it easy to reference key endpoints and tags from other modules or the CLI
+// The API base URL is constructed from the API Gateway and stage resources
 output "order_api_url" {
   value = "${local.api_base_url}/processOrder"
 }
