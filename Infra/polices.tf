@@ -113,13 +113,16 @@ resource "aws_iam_policy" "cloudwatch_logs_write" {
   description = "Policy to allow writing logs to CloudWatch"
 
   policy = jsonencode({
-    "Effect": "Allow",
-    "Action": [
-      "logs:CreateLogGroup",
-      "logs:CreateLogStream",
-      "logs:PutLogEvents"
-    ],
-    "Resource": "arn:aws:logs:us-east-1:*:*"
+    Version   = "2012-10-17",
+    Statement = [{
+      Effect   = "Allow",
+      Action   = [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ],
+      Resource = "arn:aws:logs:us-east-1:*:*"
+    }]
   })
 }
 
