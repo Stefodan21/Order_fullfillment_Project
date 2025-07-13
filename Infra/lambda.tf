@@ -29,7 +29,7 @@ resource "aws_lambda_function" "validate_order" {
     role          = "aws_iam_role.LambdaExecutionRole.arn"
     filename      = "${path.module}/order_validation.zip"
     source_code_hash = filebase64sha256("order_validation.zip")
-    layers            = [aws_lambda_layer_version.shared_layer.arn]
+    
 
       tags = {
     Environment = var.environment
@@ -45,7 +45,7 @@ resource "aws_lambda_function" "generate_invoice" {
     role = "aws_iam_role.LambdaExecutionRole.arn"
     filename = "${path.module}/invoice_generator.zip"
     source_code_hash = filebase64sha256("invoice_generator.zip") 
-    layers            = [aws_lambda_layer_version.shared_layer.arn]   
+       
 
       tags = {
     Environment = var.environment
@@ -61,7 +61,7 @@ resource "aws_lambda_function" "shipping_suggestion" {
     role = "aws_iam_role.StepFunctionTriggerRole.arn" //arn role for lambda
     filename = "${path.module}/shipping_suggestion.zip"
     source_code_hash = filebase64sha256("shipping_suggestion.zip")     
-    layers            = [aws_lambda_layer_version.shared_layer.arn]     
+         
 
       tags = {
     Environment = var.environment
@@ -77,7 +77,7 @@ resource "aws_lambda_function" "order_status_tracking" {
     role = "aws_iam_role.LambdaExecutionRole.arn" //arn role for lambda
     filename = "${path.module}/order_status_tracking.zip"
     source_code_hash = filebase64sha256("order_status_tracking.zip")
-    layers            = [aws_lambda_layer_version.shared_layer.arn]
+    
     tags = {
       Environment = var.environment
       Project     = var.project_name

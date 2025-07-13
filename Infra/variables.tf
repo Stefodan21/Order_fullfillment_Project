@@ -40,6 +40,6 @@ locals {
     }
   }
 
-  api_base_url = "https://${aws_api_gateway_rest_api.OrderProcessingAPI.id}.execute-api.${var.region}.amazonaws.com/${aws_api_gateway_stage.OrderProcessingStage.stage_name}"
+  api_base_url = "https://${aws_api_gateway_rest_api.OrderProcessingAPI.id}.execute-api.${var.region}.amazonaws.com/${aws_api_gateway_stage.Stage.stage_name}"
 
 }
