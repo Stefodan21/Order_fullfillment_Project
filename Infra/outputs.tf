@@ -1,6 +1,4 @@
-output "order_api_url" {
-  value = "https://${aws_api_gateway_rest_api.OrderProcessingAPI.id}.execute-api.${var.region}.amazonaws.com/${aws_api_gateway_stage.OrderProcessingStage.stage_name}/processOrder"
-}
+
 
 output "default_tags" {
   value = {
