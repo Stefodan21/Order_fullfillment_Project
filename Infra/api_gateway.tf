@@ -53,7 +53,7 @@ resource "aws_api_gateway_deployment" "workflowDeployment" {
   triggers = {
     redeploy = timestamp()
   }
-  depends_on = [for i in aws_api_gateway_integration.OrderEndpointIntegration : i]
+  depends_on = [aws_api_gateway_integration.OrderEndpointIntegration]
 }
 
 
