@@ -20,6 +20,7 @@ resource "aws_api_gateway_resource" "OrderEndpointResource" {
   rest_api_id = aws_api_gateway_rest_api.OrderProcessingAPI.id
   parent_id   = aws_api_gateway_rest_api.OrderProcessingAPI.root_resource_id
   path_part   = each.key
+  
 }
 
 resource "aws_api_gateway_method" "OrderEndpointPOST" {
@@ -37,7 +38,8 @@ resource "aws_api_gateway_integration" "OrderEndpointIntegration" {
   http_method             = aws_api_gateway_method.OrderEndpointPOST[each.key].http_method
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
-  uri                     = each.value
+  uri                     = each.value.lambda_arn
+  
 }
 
 resource "aws_api_gateway_deployment" "workflowDeployment" {
