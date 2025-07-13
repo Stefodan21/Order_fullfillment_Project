@@ -18,7 +18,11 @@ resource "aws_s3_bucket_lifecycle_configuration" "invoice_storage_lifecycle" {
     bucket = aws_s3_bucket.invoice_storage_ofp.id
     rule {
         id   = "expire_old_invoices"
-        status = "Enabled"      
+        status = "Enabled" 
+
+        filter {
+            prefix = "" # applies to all objects
+        }     
         expiration {
             days = 365
         }
@@ -31,7 +35,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "invoice_storage_e
   rule {
     apply_server_side_encryption_by_default {
       sse_algorithm     = "aws:kms"
-      kms_master_key_id = aws_kms_key.invoice_encryption_key.arn
+      kms_master_key_id = aws_kms_key.data_encryption.arn
     }
   }
 }
