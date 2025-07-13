@@ -13,24 +13,17 @@ resource "aws_api_gateway_rest_api" "OrderProcessingAPI" {
 
 
 
-locals {
-  order_endpoints = {
-    validateOrder     = aws_lambda_function.order_validation.invoke_arn
-    generateInvoice   = aws_lambda_function.generate_invoice.invoke_arn
-    suggestShipping   = aws_lambda_function.shipping_suggestion.invoke_arn
-    trackOrder        = aws_lambda_function.order_status_tracking.invoke_arn
-  }
-}
+
 
 resource "aws_api_gateway_resource" "OrderEndpointResource" {
-  for_each   = local.order_endpoints
+  for_each   = local.endpoints
   rest_api_id = aws_api_gateway_rest_api.OrderProcessingAPI.id
   parent_id   = aws_api_gateway_rest_api.OrderProcessingAPI.root_resource_id
   path_part   = each.key
 }
 
 resource "aws_api_gateway_method" "OrderEndpointPOST" {
-  for_each   = local.order_endpoints
+  for_each   = local.endpoints
   rest_api_id   = aws_api_gateway_rest_api.OrderProcessingAPI.id
   resource_id   = aws_api_gateway_resource.OrderEndpointResource[each.key].id
   http_method   = "POST"
@@ -38,7 +31,7 @@ resource "aws_api_gateway_method" "OrderEndpointPOST" {
 }
 
 resource "aws_api_gateway_integration" "OrderEndpointIntegration" {
-  for_each   = local.order_endpoints
+  for_each   = local.endpoints
   rest_api_id             = aws_api_gateway_rest_api.OrderProcessingAPI.id
   resource_id             = aws_api_gateway_resource.OrderEndpointResource[each.key].id
   http_method             = aws_api_gateway_method.OrderEndpointPOST[each.key].http_method
