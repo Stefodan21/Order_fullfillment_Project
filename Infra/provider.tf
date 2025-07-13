@@ -1,3 +1,5 @@
+// Terraform and AWS provider configuration
+// Sets up the AWS provider and required Terraform providers
 terraform {
     required_providers {
         aws = {
@@ -7,5 +9,5 @@ terraform {
 }
 
 provider "aws" {
-    region = "us-east-1"
+    region = var.region
 }

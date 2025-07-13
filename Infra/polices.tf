@@ -1,0 +1,149 @@
+// IAM policies for DynamoDB, Lambda, S3, and Step Functions access
+// Each policy grants specific permissions required by the workflow components
+resource "aws_iam_policy" "order_table_access" {
+  name        = "AllowOrderTableOperations"
+  description = "Policy to allow operations on the Order table in DynamoDB"
+  
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Sid    = "OrderTableAccess",
+        Effect = "Allow",
+        Action = [
+          "dynamodb:GetItem",
+          "dynamodb:PutItem",
+          "dynamodb:UpdateItem",
+          "dynamodb:Query"
+        ],
+        Resource = [
+          "arn:aws:dynamodb:us-east-1:478517495734:table/OrderDetails",
+          "arn:aws:dynamodb:us-east-1:478517495734:table/OrderDetails/index/*"
+        ]
+      }
+    ]
+  })
+}
+
+resource "aws_iam_policy" "lambda_control" {
+name        = "AllowLambdaOperations"
+  description = "Policy to allow operations on Lambda functions"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Sid    = "LambdaOps",
+        Effect = "Allow",
+        Action = [
+          "lambda:CreateFunction",
+          "lambda:UpdateFunctionCode",
+          "lambda:InvokeFunction"
+        ],
+        Resource = [
+          "arn:aws:lambda:us-east-1:478517495734:function:OrderValidation",
+          "arn:aws:lambda:us-east-1:478517495734:function:InvoiceGenerator",
+          "arn:aws:lambda:us-east-1:478517495734:function:ShippingSuggestion",
+          "arn:aws:lambda:us-east-1:478517495734:function:OrderStatusTracking"
+        ]
+        
+      },
+      {
+        Sid    = "LambdaLogging",
+        Effect = "Allow",
+        Action = [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ],
+        Resource = "arn:aws:logs:us-east-1:*:*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_policy" "invoice_s3_upload" {
+  name        = "AllowS3InvoiceUpload"
+  description = "Policy to allow uploading invoices to S3"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = ["s3:PutObject"],
+        Resource = "arn:aws:s3:::invoicestorage-ofp/*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_policy" "invoice_s3_location" {
+  name        = "AllowS3InvoiceLocationAccess"
+  description = "Policy to allow S3 bucket location access"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = ["s3:GetBucketLocation"],
+        Resource = "arn:aws:s3:::invoicestorage-ofp"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_policy" "invoice_s3_list" {
+  name        = "AllowS3InvoiceList"
+  description = "Policy to allow listing invoice bucket"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = ["s3:ListBucket"],
+        Resource = "arn:aws:s3:::invoicestorage-ofp"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_policy" "cloudwatch_logs_write" {
+  name        = "AllowCloudWatchLogsWrite"
+  description = "Policy to allow writing logs to CloudWatch"
+
+  policy = jsonencode({
+    Version   = "2012-10-17",
+    Statement = [{
+      Effect   = "Allow",
+      Action   = [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ],
+      Resource = "arn:aws:logs:us-east-1:*:*"
+    }]
+  })
+}
+
+resource "aws_iam_policy" "stepfunctions_exec" {
+  name        = "AllowStepFunctionsExecution"
+  description = "Policy to allow execution of a specific state machine"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "states:StartExecution",
+          "states:DescribeExecution",
+          "states:GetExecutionHistory"
+        ],
+        Resource = "arn:aws:states:us-east-1:478517495734:stateMachine:OrderFullfillment"
+      }
+    ]
+  })
+}

@@ -4,4 +4,5 @@ def test_root_alive():
     client = api.test_client()
     res = client.get("/")
     assert res.status_code == 200
-    assert b"Order Fulfillment API is running" in res.data
+    assert "Order Fulfillment API is Running!" in res.get_data(as_text=True)
+

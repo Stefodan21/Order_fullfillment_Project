@@ -1,4 +1,5 @@
-// cloudwatch for monitoring
+// CloudWatch dashboard for monitoring Lambda invocations
+// Provides visibility into function usage and performance
 resource "aws_cloudwatch_dashboard" "cloudwatchMonitoring" {
     dashboard_name = "OrderProcessingMonitoring"
     dashboard_body = <<EOF
