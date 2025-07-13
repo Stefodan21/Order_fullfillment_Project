@@ -1,3 +1,7 @@
+output "region" {
+  description = "The AWS region used for deployment."
+  value       = var.region
+}
 
 
 output "default_tags" {
