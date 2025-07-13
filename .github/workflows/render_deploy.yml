@@ -1,12 +1,14 @@
 name: Deploy to Render After Tests Pass
 
 on:
-  pull_request: 
+  pull_request:
+    types: [closed]
     branches:
       - render_deploy
 
 jobs:
   deploy-to-render:
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
 
     steps:
