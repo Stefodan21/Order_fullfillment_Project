@@ -1,5 +1,9 @@
 // IAM roles for Lambda and Step Function execution
 // Defines trust policies and tags for each role
+
+data "aws_caller_identity" "current" {}
+
+
 resource "aws_iam_role" "LambdaExecutionRole" {
   name = "${var.project_name}-${var.environment}-LambdaExecutionRole"
 
@@ -52,7 +56,7 @@ resource "aws_iam_role" "TerraformDeploymentRole" {
       {
         Effect = "Allow",
         Principal = {
-          AWS = "arn:aws:iam::${var.account_id}:role/TerraformOperatorRole"
+          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/TerraformOperatorRole"
         },
         Action = "sts:AssumeRole"
       }
