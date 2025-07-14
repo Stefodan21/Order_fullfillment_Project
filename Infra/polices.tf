@@ -25,6 +25,96 @@ resource "aws_iam_policy" "order_table_access" {
   })
 }
 
+resource "aws_iam_policy" "terraform_kms_provision" {
+  name        = "${var.project_name}-${var.environment}-TerraformKMSProvision"
+  description = "Allow Terraform to create and tag KMS keys"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "kms:CreateKey",
+          "kms:TagResource",
+          "kms:PutKeyPolicy",
+          "kms:EnableKeyRotation",
+          "kms:DescribeKey"
+        ],
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_policy" "terraform_apigateway_provision" {
+  name        = "${var.project_name}-${var.environment}-TerraformAPIGatewayProvision"
+  description = "Allow Terraform to create and tag API Gateway resources"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "apigateway:POST",
+          "apigateway:PUT",
+          "apigateway:GET",
+          "apigateway:DELETE"
+        ],
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_policy" "terraform_iam_provision" {
+  name        = "${var.project_name}-${var.environment}-TerraformIAMProvision"
+  description = "Allow Terraform to create IAM roles and policies"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "iam:CreateRole",
+          "iam:AttachRolePolicy",
+          "iam:PassRole",
+          "iam:DeleteRole",
+          "iam:GetRole",
+          "iam:CreatePolicy",
+          "iam:DeletePolicy"
+        ],
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_policy" "terraform_s3_provision" {
+  name        = "${var.project_name}-${var.environment}-TerraformS3Provision"
+  description = "Allow Terraform to create and configure S3 buckets"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "s3:CreateBucket",
+          "s3:PutBucketPolicy",
+          "s3:PutBucketTagging",
+          "s3:PutEncryptionConfiguration",
+          "s3:GetBucketLocation"
+        ],
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+
 resource "aws_iam_policy" "lambda_control" {
 name        = "AllowLambdaOperations"
   description = "Policy to allow operations on Lambda functions"
