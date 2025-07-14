@@ -1,7 +1,7 @@
 // S3 bucket for invoice storage
 // Stores generated invoices and applies lifecycle rules for retention
 resource "aws_s3_bucket" "invoice_storage_ofp" {
-    bucket = "invoicestorage-ofp"
+    bucket = "invoicestorage-ofp-${var.project_name}"
     lifecycle {
         prevent_destroy = true
     }

@@ -35,3 +35,24 @@ resource "aws_iam_role_policy_attachment" "step_trigger_exec" {
   role       = aws_iam_role.StepFunctionTriggerRole.name
   policy_arn = aws_iam_policy.stepfunctions_exec.arn
 }
+
+resource "aws_iam_role_policy_attachment" "terraform_kms_attach" {
+  role       = aws_iam_role.TerraformDeploymentRole.name
+  policy_arn = aws_iam_policy.terraform_kms_provision.arn
+}
+
+resource "aws_iam_role_policy_attachment" "terraform_apigateway_attach" {
+  role       = aws_iam_role.TerraformDeploymentRole.name
+  policy_arn = aws_iam_policy.terraform_apigateway_provision.arn
+}
+
+resource "aws_iam_role_policy_attachment" "terraform_iam_attach" {
+  role       = aws_iam_role.TerraformDeploymentRole.name
+  policy_arn = aws_iam_policy.terraform_iam_provision.arn
+}
+
+resource "aws_iam_role_policy_attachment" "terraform_s3_attach" {
+  role       = aws_iam_role.TerraformDeploymentRole.name
+  policy_arn = aws_iam_policy.terraform_s3_provision.arn
+}
+

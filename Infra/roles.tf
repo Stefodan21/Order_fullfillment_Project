@@ -20,6 +20,8 @@ resource "aws_iam_role" "LambdaExecutionRole" {
   })
 }
 
+
+
 resource "aws_iam_role" "StepFunctionTriggerRole" {
   name = "${var.project_name}-${var.environment}-StepFunctionTriggerRole"
 
@@ -38,4 +40,28 @@ resource "aws_iam_role" "StepFunctionTriggerRole" {
       Action = "sts:AssumeRole"
     }]
   })
+
 }
+
+resource "aws_iam_role" "TerraformDeploymentRole" {
+  name = "${var.project_name}-${var.environment}-TerraformDeploymentRole"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Principal = {
+          AWS = "arn:aws:iam::${var.account_id}:role/TerraformOperatorRole"
+        },
+        Action = "sts:AssumeRole"
+      }
+    ]
+  })
+
+  tags = {
+    Environment = var.environment
+    Project     = var.project_name
+  }
+}
+

@@ -3,6 +3,13 @@ variable "region" {
   type = string
   description = "AWS region for deployment"
 }
+
+variable "account_id" {
+  description = "AWS Account ID used for constructing ARNs"
+  type        = string
+}
+
+
 variable "environment" {
   type    = string
   default = "dev"
