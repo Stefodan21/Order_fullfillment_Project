@@ -10,11 +10,6 @@ resource "aws_api_gateway_rest_api" "OrderProcessingAPI" {
      }
   }
 
-
-
-
-
-
 resource "aws_api_gateway_resource" "OrderEndpointResource" {
   for_each   = local.endpoints
   rest_api_id = aws_api_gateway_rest_api.OrderProcessingAPI.id
