@@ -13,11 +13,6 @@ import os
 # This function is used to place an invoice in the S3 bucket and update the DynamoDB table
 
 
-# Require environment variables, no misleading fallbacks
-bucket_name = os.environ["INVOICE_BUCKET_NAME"]  # Will raise error if not set
-table_name = os.environ["DYNAMODB_TABLE_NAME"]   # Will raise error if not set
-
-
 def lambda_handler(event, context):
     
     # gets input from event parser (assumes JSON body)
@@ -37,8 +32,8 @@ def lambda_handler(event, context):
     # Initialize AWS resources
     s3 = boto3.resource('s3')
     dynamodb = boto3.resource('dynamodb')
-    bucket_name = 'invoicestorage-ofp'
-    table_name = 'OrderDetails'
+    bucket_name = os.environ["INVOICE_BUCKET_NAME"]  # Use env var for modularity
+    table_name = os.environ["DYNAMODB_TABLE_NAME"]   # Use env var for modularity
     table = dynamodb.Table(table_name)
     # It generates a unique order ID, invoice number, and timestamp, and stores them in the DynamoDB table
     invnum = str(uuid.uuid4())

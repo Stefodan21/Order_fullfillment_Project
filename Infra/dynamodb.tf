@@ -1,5 +1,5 @@
-resource "aws_dynamodb_table" "OrderDetails" {
-  name         = "OrderDetails-${var.project_name}-${var.environment}-${random_id.bucket_suffix.hex}"
+resource "aws_dynamodb_table" "orders" {
+  name         = "orders-${var.project_name}-${var.environment}-${random_id.bucket_suffix.hex}"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "order_id"
   range_key    = "OrderedAt"
