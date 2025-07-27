@@ -39,7 +39,10 @@ resource "aws_iam_policy" "terraform_kms_provision" {
           "kms:TagResource",
           "kms:PutKeyPolicy",
           "kms:EnableKeyRotation",
-          "kms:DescribeKey"
+          "kms:GetKeyRotationStatus",
+          "kms:DescribeKey",
+          "kms:CreateAlias",
+          "kms:UpdateAlias"
         ],
         Resource = "*"
       }
