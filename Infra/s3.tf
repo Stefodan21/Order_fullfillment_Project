@@ -21,7 +21,7 @@ resource "aws_s3_bucket" "invoice_storage" {
 
 // s3 removes invoices after 1 year
 resource "aws_s3_bucket_lifecycle_configuration" "invoice_storage_lifecycle" {
-    bucket = aws_s3_bucket.invoice_storage_ofp.id
+    bucket = aws_s3_bucket.invoice_storage.id
     rule {
         id   = "expire_old_invoices"
         status = "Enabled" 
@@ -36,7 +36,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "invoice_storage_lifecycle" {
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "invoice_storage_encryption" {
-  bucket = aws_s3_bucket.invoice_storage_ofp.id
+  bucket = aws_s3_bucket.invoice_storage.id
 
   rule {
     apply_server_side_encryption_by_default {

@@ -4,12 +4,12 @@ output "region" {
 }
 
 output "invoice_bucket_name" {
-  value = aws_s3_bucket.invoice_storage_ofp.bucket
+  value = aws_s3_bucket.invoice_storage.bucket
 }
 
 
 output "dynamodb_table_name" {
-  value = aws_dynamodb_table.OrderDetails.name
+  value = aws_dynamodb_table.orders.name
 }
 
 
