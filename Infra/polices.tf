@@ -251,7 +251,7 @@ resource "aws_iam_policy" "assume_deployment_role" {
     Statement = [
       {
         Effect = "Allow",
-        Action = "sts:AssumeRole",
+        Action = ["sts:AssumeRole"],
         Resource = aws_iam_role.TerraformDeploymentRole.arn
       }
     ]

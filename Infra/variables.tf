@@ -4,10 +4,6 @@ variable "region" {
   description = "AWS region for deployment"
 }
 
-variable "terraform_operator_role_arn" {
-  type        = string
-  description = "ARN of the IAM role Terraform should assume"
-}
 
 
 variable "environment" {
