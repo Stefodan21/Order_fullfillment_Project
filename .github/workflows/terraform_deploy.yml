@@ -65,6 +65,11 @@ jobs:
         run: terraform plan
         working-directory: Infra
 
+      - name: Terraform Destroy (cleanup)
+        run: terraform destroy -auto-approve
+        working-directory: Infra
+        continue-on-error: true
+
       - name: Terraform Apply
         run: terraform apply -auto-approve
         working-directory: Infra
