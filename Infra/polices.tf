@@ -240,3 +240,20 @@ resource "aws_iam_policy" "stepfunctions_exec" {
     ]
   })
 }
+
+
+resource "aws_iam_policy" "assume_deployment_role" {
+  name        = "${var.project_name}-${var.environment}-AssumeDeploymentRolePolicy"
+  description = "Allows assuming TerraformDeploymentRole"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = "sts:AssumeRole",
+        Resource = aws_iam_role.TerraformDeploymentRole.arn
+      }
+    ]
+  })
+}
