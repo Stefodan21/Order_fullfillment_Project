@@ -6,8 +6,8 @@ resource "random_id" "bucket_suffix" {
 }
 
 
-resource "aws_s3_bucket" "invoice_storage_ofp" {
-    bucket = "invoicestorage-ofp-${var.project_name}-${random_id.bucket_suffix.hex}"
+resource "aws_s3_bucket" "invoice_storage" {
+    bucket = "invoicestorage-${var.project_name}-${random_id.bucket_suffix.hex}"
     lifecycle {
         prevent_destroy = true
     }
