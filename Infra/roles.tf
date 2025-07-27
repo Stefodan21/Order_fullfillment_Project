@@ -56,28 +56,6 @@ resource "aws_iam_role" "TerraformDeploymentRole" {
       {
         Effect = "Allow",
         Principal = {
-          AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/TerraformOperatorRole"
-        },
-        Action = "sts:AssumeRole"
-      }
-    ]
-  })
-
-  tags = {
-    Environment = var.environment
-    Project     = var.project_name
-  }
-}
-
-resource "aws_iam_role" "TerraformOperatorRole" {
-  name = "${var.project_name}-${var.environment}-TerraformOperatorRole"
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Effect = "Allow",
-        Principal = {
           AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/Order_fullfillment_project_user"
         },
         Action = "sts:AssumeRole"
@@ -91,8 +69,5 @@ resource "aws_iam_role" "TerraformOperatorRole" {
   }
 }
 
-resource "aws_iam_role_policy_attachment" "operator_assume_attach" {
-  role       = aws_iam_role.TerraformOperatorRole.name
-  policy_arn = aws_iam_policy.assume_deployment_role.arn
-}
+
 
