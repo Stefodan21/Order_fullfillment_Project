@@ -17,8 +17,8 @@ resource "aws_iam_policy" "order_table_access" {
           "dynamodb:Query"
         ],
         Resource = [
-          "arn:aws:dynamodb:us-east-1:478517495734:table/OrderDetails",
-          "arn:aws:dynamodb:us-east-1:478517495734:table/OrderDetails/index/*"
+          aws_dynamodb_table.orders.arn,
+          "${aws_dynamodb_table.orders.arn}/index/*"
         ]
       }
     ]
@@ -165,7 +165,7 @@ resource "aws_iam_policy" "invoice_s3_upload" {
       {
         Effect = "Allow",
         Action = ["s3:PutObject"],
-        Resource = "arn:aws:s3:::invoicestorage-ofp/*"
+        Resource = "${aws_s3_bucket.invoice_storage.arn}/*"
       }
     ]
   })
@@ -181,7 +181,7 @@ resource "aws_iam_policy" "invoice_s3_location" {
       {
         Effect = "Allow",
         Action = ["s3:GetBucketLocation"],
-        Resource = "arn:aws:s3:::invoicestorage-ofp"
+        Resource = aws_s3_bucket.invoice_storage.arn
       }
     ]
   })
@@ -197,7 +197,7 @@ resource "aws_iam_policy" "invoice_s3_list" {
       {
         Effect = "Allow",
         Action = ["s3:ListBucket"],
-        Resource = "arn:aws:s3:::invoicestorage-ofp"
+        Resource = aws_s3_bucket.invoice_storage.arn
       }
     ]
   })
