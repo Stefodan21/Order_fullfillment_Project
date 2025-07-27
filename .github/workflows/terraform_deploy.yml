@@ -71,3 +71,30 @@ jobs:
 
       - name: Notify Deployment Success
         run: echo "Deployment was successful!"
+
+  test:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+        
+      - name: Run tests
+        run: |
+          export INVOICE_BUCKET_NAME=$(cd Infra && terraform output -raw invoice_bucket_name)
+          export DYNAMODB_TABLE_NAME=$(cd Infra && terraform output -raw dynamodb_table_name)
+          PYTHONPATH=. pytest tests/

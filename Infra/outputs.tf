@@ -3,6 +3,15 @@ output "region" {
   value       = var.region
 }
 
+output "invoice_bucket_name" {
+  value = aws_s3_bucket.invoice_storage_ofp.bucket
+}
+
+
+output "dynamodb_table_name" {
+  value = aws_dynamodb_table.OrderDetails.name
+}
+
 
 output "default_tags" {
   value = {
