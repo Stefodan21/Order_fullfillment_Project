@@ -75,7 +75,7 @@ jobs:
         working-directory: Infra
 
       - name: Notify Deployment Success
-        run: echo "Deployment was successful!"
+        run: echo "Deployment was successful!  ✅"
 
   test:
     needs: deploy
