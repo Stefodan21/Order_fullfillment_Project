@@ -4,6 +4,8 @@ __pycache__/
 *$py.class
 invoices/
 *.zip
+.terraform.lock.hcl
+
 # C extensions
 *.so
 
