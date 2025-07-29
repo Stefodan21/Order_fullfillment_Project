@@ -5,7 +5,7 @@ data "aws_caller_identity" "current" {}
 
 
 resource "aws_iam_role" "LambdaExecutionRole" {
-  name = "${var.project_name}-${var.environment}-LambdaExecutionRole"
+  name = "${var.project_name}-${var.environment}-LambdaExecutionRole-${random_id.bucket_suffix.hex}"
 
   tags = {
     Environment = var.environment
