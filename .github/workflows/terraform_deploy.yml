@@ -11,6 +11,8 @@ jobs:
   deploy:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
+    env:
+      ALLOW_DESTROY: ${{ secrets.ALLOW_DESTROY }}
 
     steps:
       - uses: actions/checkout@v3
@@ -67,7 +69,7 @@ jobs:
 
       # Optional cleanup – only when explicitly requested
       - name: Terraform Destroy (cleanup)
-        if: secrets.ALLOW_DESTROY == 'true'        # gate on a protected secret / workflow-dispatch input
+        if: env.ALLOW_DESTROY == 'true'           # gate on a protected secret / workflow-dispatch input
         run: terraform destroy -auto-approve -input=false
         working-directory: Infra
         continue-on-error: false                   # fail fast to stop an unsafe apply
