@@ -65,11 +65,12 @@ jobs:
         run: terraform plan
         working-directory: Infra
 
+      # Optional cleanup – only when explicitly requested
       - name: Terraform Destroy (cleanup)
-        run: terraform destroy -auto-approve
+        if: secrets.ALLOW_DESTROY == 'true'        # gate on a protected secret / workflow-dispatch input
+        run: terraform destroy -auto-approve -input=false
         working-directory: Infra
-        continue-on-error: true
-
+        continue-on-error: false                   # fail fast to stop an unsafe apply
       - name: Terraform Apply
         run: terraform apply -auto-approve
         working-directory: Infra
