@@ -26,7 +26,7 @@ resource "aws_iam_policy" "order_table_access" {
 }
 
 resource "aws_iam_policy" "terraform_kms_provision" {
-  name        = "${var.project_name}-${var.environment}-TerraformKMSProvision"
+  name        = "${var.project_name}-${var.environment}-TerraformKMSProvision-${random_id.bucket_suffix.hex}"
   description = "Allow Terraform to create and tag KMS keys"
 
   policy = jsonencode({
@@ -51,7 +51,7 @@ resource "aws_iam_policy" "terraform_kms_provision" {
 }
 
 resource "aws_iam_policy" "terraform_apigateway_provision" {
-  name        = "${var.project_name}-${var.environment}-TerraformAPIGatewayProvision"
+  name        = "${var.project_name}-${var.environment}-TerraformAPIGatewayProvision-${random_id.bucket_suffix.hex}"
   description = "Allow Terraform to create and tag API Gateway resources"
 
   policy = jsonencode({
@@ -72,7 +72,7 @@ resource "aws_iam_policy" "terraform_apigateway_provision" {
 }
 
 resource "aws_iam_policy" "terraform_iam_provision" {
-  name        = "${var.project_name}-${var.environment}-TerraformIAMProvision"
+  name        = "${var.project_name}-${var.environment}-TerraformIAMProvision-${random_id.bucket_suffix.hex}"
   description = "Allow Terraform to create IAM roles and policies"
 
   policy = jsonencode({
@@ -96,7 +96,7 @@ resource "aws_iam_policy" "terraform_iam_provision" {
 }
 
 resource "aws_iam_policy" "terraform_s3_provision" {
-  name        = "${var.project_name}-${var.environment}-TerraformS3Provision"
+  name        = "${var.project_name}-${var.environment}-TerraformS3Provision-${random_id.bucket_suffix.hex}"
   description = "Allow Terraform to create and configure S3 buckets"
 
   policy = jsonencode({
@@ -119,7 +119,7 @@ resource "aws_iam_policy" "terraform_s3_provision" {
 
 
 resource "aws_iam_policy" "lambda_control" {
-name        = "AllowLambdaOperations"
+  name        = "AllowLambdaOperations-${random_id.bucket_suffix.hex}"
   description = "Policy to allow operations on Lambda functions"
 
   policy = jsonencode({
