@@ -67,7 +67,7 @@ jobs:
 
       # Optional cleanup – only when explicitly requested
       - name: Terraform Destroy (cleanup)
-        if: secrets.ALLOW_DESTROY == 'true'        # gate on a protected secret / workflow-dispatch input
+        if: ${{ secrets.AWS_REGION }} == 'true'        
         run: terraform destroy -auto-approve -input=false
         working-directory: Infra
         continue-on-error: false                   # fail fast to stop an unsafe apply
