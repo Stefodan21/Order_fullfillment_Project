@@ -42,7 +42,10 @@ resource "aws_iam_policy" "terraform_kms_provision" {
           "kms:GetKeyRotationStatus",
           "kms:DescribeKey",
           "kms:CreateAlias",
-          "kms:UpdateAlias"
+          "kms:UpdateAlias",
+          "kms:DeleteAlias",
+          "kms:ScheduleKeyDeletion",
+          "kms:CancelKeyDeletion"
         ],
         Resource = "*"
       }
@@ -83,11 +86,16 @@ resource "aws_iam_policy" "terraform_iam_provision" {
         Action = [
           "iam:CreateRole",
           "iam:AttachRolePolicy",
+          "iam:DetachRolePolicy",
           "iam:PassRole",
           "iam:DeleteRole",
           "iam:GetRole",
+          "iam:ListAttachedRolePolicies",
           "iam:CreatePolicy",
-          "iam:DeletePolicy"
+          "iam:DeletePolicy",
+          "iam:GetPolicy",
+          "iam:ListPolicyVersions",
+          "iam:DeletePolicyVersion"
         ],
         Resource = "*"
       }
@@ -106,10 +114,17 @@ resource "aws_iam_policy" "terraform_s3_provision" {
         Effect = "Allow",
         Action = [
           "s3:CreateBucket",
+          "s3:DeleteBucket",
           "s3:PutBucketPolicy",
+          "s3:DeleteBucketPolicy",
           "s3:PutBucketTagging",
           "s3:PutEncryptionConfiguration",
-          "s3:GetBucketLocation"
+          "s3:GetBucketLocation",
+          "s3:GetBucketPolicy",
+          "s3:GetEncryptionConfiguration",
+          "s3:ListBucket",
+          "s3:DeleteObject",
+          "s3:DeleteObjectVersion"
         ],
         Resource = "*"
       }
@@ -119,7 +134,7 @@ resource "aws_iam_policy" "terraform_s3_provision" {
 
 
 resource "aws_iam_policy" "lambda_control" {
-  name        = "AllowLambdaOperations-${random_id.bucket_suffix.hex}"
+  name        = "AllowLambdaOperations"
   description = "Policy to allow operations on Lambda functions"
 
   policy = jsonencode({
@@ -131,7 +146,11 @@ resource "aws_iam_policy" "lambda_control" {
         Action = [
           "lambda:CreateFunction",
           "lambda:UpdateFunctionCode",
-          "lambda:InvokeFunction"
+          "lambda:InvokeFunction",
+          "lambda:DeleteFunction",
+          "lambda:GetFunction",
+          "lambda:ListFunctions",
+          "lambda:UpdateFunctionConfiguration"
         ],
         Resource = [
           "arn:aws:lambda:us-east-1:478517495734:function:OrderValidation",
@@ -147,7 +166,8 @@ resource "aws_iam_policy" "lambda_control" {
         Action = [
           "logs:CreateLogGroup",
           "logs:CreateLogStream",
-          "logs:PutLogEvents"
+          "logs:PutLogEvents",
+          "logs:DeleteLogGroup"
         ],
         Resource = "arn:aws:logs:us-east-1:*:*"
       }
@@ -243,7 +263,7 @@ resource "aws_iam_policy" "stepfunctions_exec" {
 
 
 resource "aws_iam_policy" "assume_deployment_role" {
-  name        = "${var.project_name}-${var.environment}-AssumeDeploymentRolePolicy"
+  name        = "${var.project_name}-${var.environment}-AssumeDeploymentRolePolicy-${random_id.bucket_suffix.hex}"
   description = "Allows assuming TerraformDeploymentRole"
 
   policy = jsonencode({
@@ -253,6 +273,81 @@ resource "aws_iam_policy" "assume_deployment_role" {
         Effect = "Allow",
         Action = ["sts:AssumeRole"],
         Resource = aws_iam_role.TerraformDeploymentRole.arn
+      }
+    ]
+  })
+}
+
+resource "aws_iam_policy" "terraform_dynamodb_provision" {
+  name        = "${var.project_name}-${var.environment}-TerraformDynamoDBProvision-${random_id.bucket_suffix.hex}"
+  description = "Allow Terraform to create and delete DynamoDB tables"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "dynamodb:CreateTable",
+          "dynamodb:DeleteTable",
+          "dynamodb:DescribeTable",
+          "dynamodb:UpdateTable",
+          "dynamodb:TagResource",
+          "dynamodb:UntagResource",
+          "dynamodb:ListTagsOfResource"
+        ],
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_policy" "terraform_stepfunctions_provision" {
+  name        = "${var.project_name}-${var.environment}-TerraformStepFunctionsProvision-${random_id.bucket_suffix.hex}"
+  description = "Allow Terraform to create and delete Step Functions"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "states:CreateStateMachine",
+          "states:DeleteStateMachine",
+          "states:DescribeStateMachine",
+          "states:UpdateStateMachine",
+          "states:TagResource",
+          "states:UntagResource",
+          "states:ListTagsForResource"
+        ],
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_policy" "terraform_lambda_provision" {
+  name        = "${var.project_name}-${var.environment}-TerraformLambdaProvision-${random_id.bucket_suffix.hex}"
+  description = "Allow Terraform to create and delete Lambda functions"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Action = [
+          "lambda:CreateFunction",
+          "lambda:DeleteFunction",
+          "lambda:UpdateFunctionCode",
+          "lambda:UpdateFunctionConfiguration",
+          "lambda:GetFunction",
+          "lambda:ListFunctions",
+          "lambda:AddPermission",
+          "lambda:RemovePermission",
+          "lambda:TagResource",
+          "lambda:UntagResource"
+        ],
+        Resource = "*"
       }
     ]
   })

@@ -1,57 +1,7 @@
-// IAM roles for Lambda and Step Function execution
-// Defines trust policies and tags for each role
+// IAM roles for consolidated deployment and runtime execution
+// Single role approach for simplified permission management
 
 data "aws_caller_identity" "current" {}
-
-
-resource "aws_iam_role" "LambdaExecutionRole" {
-  name = "${var.project_name}-${var.environment}-LambdaExecutionRole-${random_id.bucket_suffix.hex}"
-
-  tags = {
-    Environment = var.environment
-    Project     = var.project_name
-  }
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [{
-      Effect = "Allow",
-      Principal = {
-        Service = [
-          "lambda.amazonaws.com",
-          "states.amazonaws.com"
-        ]
-      },
-      Action = "sts:AssumeRole"
-    }]
-  })
-}
-
-
-
-resource "aws_iam_role" "StepFunctionTriggerRole" {
-  name = "${var.project_name}-${var.environment}-StepFunctionTriggerRole"
-
-  tags = {
-    Environment = var.environment
-    Project     = var.project_name
-  }
-
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [{
-      Effect = "Allow",
-      Principal = {
-        Service = [
-          "lambda.amazonaws.com",
-          "states.amazonaws.com"
-        ]
-      },
-      Action = "sts:AssumeRole"
-    }]
-  })
-
-}
 
 data "aws_iam_policy_document" "terraform_deployer_trust" {
   statement {
@@ -62,9 +12,22 @@ data "aws_iam_policy_document" "terraform_deployer_trust" {
     }
     actions = ["sts:AssumeRole"]
   }
+  
+  statement {
+    effect = "Allow"
+    principals {
+      type        = "Service"
+      identifiers = [
+        "lambda.amazonaws.com",
+        "states.amazonaws.com"
+      ]
+    }
+    actions = ["sts:AssumeRole"]
+  }
 }
 
-// Use a separate policy document for the TerraformDeploymentRole's assume_role_policy to clearly define and manage trust relationships, especially for deployment users.
+// Consolidated role for both Terraform deployment and runtime execution
+// This role can be assumed by the deployment user and AWS services (Lambda, Step Functions)
 resource "aws_iam_role" "TerraformDeploymentRole" {
   name = "${var.project_name}-${var.environment}-TerraformDeploymentRole"
 
