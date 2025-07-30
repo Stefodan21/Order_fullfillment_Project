@@ -7,12 +7,13 @@ variable "region" {
 
 
 variable "project_name" {
-  type    = string
-  default = "order-fulfillment"
+  type        = string
+  default     = "order-fulfillment"
+  description = "Logical service name used as prefix for all resource names"
   
   validation {
-    condition     = length(var.project_name) <= 20
-    error_message = "Project name must be 20 characters or less to ensure Lambda function names stay under AWS 64-character limit."
+    condition     = length(var.project_name) <= 20 && can(regex("^[-a-zA-Z0-9_]+$", var.project_name))
+    error_message = "Must be ≤20 chars and contain only letters, numbers, hyphens, or underscores (AWS Lambda limit)."
   }
 }
 
@@ -23,6 +24,16 @@ variable "environment" {
   validation {
     condition     = length(var.environment) <= 10
     error_message = "Environment name must be 10 characters or less to ensure Lambda function names stay under AWS 64-character limit."
+  }
+}
+
+variable "deployer_principal_arn" {
+  type        = string
+  description = "ARN of the IAM principal (user/role) that can assume the TerraformDeploymentRole. Examples: 'arn:aws:iam::123456789012:user/terraform-user' or 'arn:aws:iam::123456789012:role/github-actions-role'"
+  
+  validation {
+    condition = can(regex("^arn:aws:iam::[0-9]{12}:(user|role)/.+", var.deployer_principal_arn))
+    error_message = "The deployer_principal_arn must be a valid IAM user or role ARN format: arn:aws:iam::ACCOUNT:user/USERNAME or arn:aws:iam::ACCOUNT:role/ROLENAME"
   }
 }
 

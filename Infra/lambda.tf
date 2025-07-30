@@ -18,7 +18,7 @@ locals {
 
 resource "aws_lambda_function" "start_workflow" {
   function_name =  local.function_names.start_workflow
-  handler       = "StartWorkflow.lambda_handler"
+  handler       = "start_workflow.lambda_handler"
   runtime       = "python3.9"
   role          = aws_iam_role.LambdaExecutionRole.arn
   filename      = "${path.module}/start_workflow.zip"
@@ -55,7 +55,7 @@ resource "aws_lambda_function" "validate_order" {
 // lambda function for invoice generation
 resource "aws_lambda_function" "generate_invoice" {
     function_name = local.function_names.generate_invoice
-    handler = "InvoiceGenerator.lambda_handler"
+    handler = "invoice_generator.lambda_handler"
     runtime = "python3.9"
     role = aws_iam_role.LambdaExecutionRole.arn
     filename = "${path.module}/invoice_generator.zip"
@@ -71,7 +71,7 @@ resource "aws_lambda_function" "generate_invoice" {
 // lambda function for shipping suggestion
 resource "aws_lambda_function" "shipping_suggestion" {
     function_name = local.function_names.shipping_suggestion
-    handler = "ShippingSuggestion.lambda_handler"
+    handler = "shipping_suggestion.lambda_handler"
     runtime = "python3.9"
     role = aws_iam_role.LambdaExecutionRole.arn
     filename = "${path.module}/shipping_suggestion.zip"
@@ -87,7 +87,7 @@ resource "aws_lambda_function" "shipping_suggestion" {
 // lambda function for order status tracking
 resource "aws_lambda_function" "order_status_tracking" {
     function_name = local.function_names.order_status_tracking
-    handler = "OrderStatusTracking.lambda_handler"
+    handler = "order_status_tracking.lambda_handler"
     runtime = "python3.9"
     role = aws_iam_role.LambdaExecutionRole.arn
     filename = "${path.module}/order_status_tracking.zip"

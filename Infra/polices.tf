@@ -77,7 +77,7 @@ locals {
             "logs:CreateLogStream",
             "logs:PutLogEvents"
           ]
-          Resource = "arn:aws:logs:us-east-1:*:*"
+          Resource = "*"
         }
       ]
     }
@@ -323,7 +323,7 @@ resource "aws_iam_policy" "lambda_control" {
           "logs:PutLogEvents",
           "logs:DeleteLogGroup"
         ],
-        Resource = "arn:aws:logs:us-east-1:*:*"
+        Resource = "*"
       }
     ]
   })
@@ -375,7 +375,7 @@ resource "aws_iam_policy" "lambda_runtime_execution" {
           "logs:CreateLogStream",
           "logs:PutLogEvents"
         ],
-        Resource = "arn:aws:logs:us-east-1:*:log-group:/aws/lambda/${var.project_name}-${var.environment}-*:*"
+        Resource = "*"
       }
     ]
   })
@@ -413,7 +413,7 @@ resource "aws_iam_policy" "step_function_runtime_execution" {
           "logs:CreateLogStream",
           "logs:PutLogEvents"
         ],
-        Resource = "arn:aws:logs:us-east-1:*:log-group:/aws/stepfunctions/${var.project_name}-${var.environment}-*:*"
+        Resource = "*"
       }
     ]
   })
@@ -638,7 +638,7 @@ resource "aws_iam_policy" "terraform_runtime_execution" {
           "logs:CreateLogStream",
           "logs:PutLogEvents"
         ],
-        Resource = "arn:aws:logs:us-east-1:*:*"
+        Resource = "*"
       },
       // Step Functions execution
       {
@@ -651,25 +651,12 @@ resource "aws_iam_policy" "terraform_runtime_execution" {
         ],
         Resource = aws_sfn_state_machine.OrderFullfillment.arn
       },
-      // Lambda control/invocation - split between global and function-specific actions
-      {
-        Sid = "LambdaRuntimeGlobal",
-        Effect = "Allow",
-        Action = [
-          "lambda:CreateFunction",
-          "lambda:ListFunctions"
-        ],
-        Resource = "*"
-      },
+      // Lambda invocation for runtime operations only
       {
         Sid = "LambdaRuntimeSpecific",
         Effect = "Allow",
         Action = [
-          "lambda:UpdateFunctionCode",
-          "lambda:InvokeFunction",
-          "lambda:DeleteFunction",
-          "lambda:GetFunction",
-          "lambda:UpdateFunctionConfiguration"
+          "lambda:InvokeFunction"
         ],
         Resource = [
           aws_lambda_function.start_workflow.arn,
@@ -688,7 +675,7 @@ resource "aws_iam_policy" "terraform_runtime_execution" {
           "logs:PutLogEvents",
           "logs:DeleteLogGroup"
         ],
-        Resource = "arn:aws:logs:us-east-1:*:*"
+        Resource = "*"
       }
     ]
   })

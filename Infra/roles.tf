@@ -9,7 +9,7 @@ data "aws_iam_policy_document" "terraform_deployer_trust" {
     effect = "Allow"
     principals {
       type        = "AWS"
-      identifiers = ["arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/Order_fullfillment_project_user"]
+      identifiers = [var.deployer_principal_arn]
     }
     actions = ["sts:AssumeRole"]
     
@@ -57,15 +57,9 @@ data "aws_iam_policy_document" "lambda_execution_trust" {
     
     # Additional restriction to specific Lambda functions only
     condition {
-      test     = "ArnEquals"
+      test     = "ArnLike"
       variable = "aws:SourceArn"
-      values   = [
-        aws_lambda_function.start_workflow.arn,
-        aws_lambda_function.validate_order.arn,
-        aws_lambda_function.generate_invoice.arn,
-        aws_lambda_function.shipping_suggestion.arn,
-        aws_lambda_function.order_status_tracking.arn
-      ]
+      values   = ["arn:aws:lambda:us-east-1:${data.aws_caller_identity.current.account_id}:function:${var.project_name}-${var.environment}-*"]
     }
   }
 }
@@ -88,9 +82,9 @@ data "aws_iam_policy_document" "step_function_execution_trust" {
     }
     
     condition {
-      test     = "ArnEquals"
+      test     = "ArnLike"
       variable = "aws:SourceArn"
-      values   = [aws_sfn_state_machine.OrderFullfillment.arn]
+      values   = ["arn:aws:states:us-east-1:${data.aws_caller_identity.current.account_id}:stateMachine:*"]
     }
   }
 }
