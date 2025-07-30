@@ -3,7 +3,7 @@
 
 locals {
   # Calculate base prefix length to ensure function names stay under 64 character AWS limit
-  base_prefix_raw = "${var.project_name}-${var.environment}"
+  base_prefix_raw = "${lower(var.project_name)}-${var.environment}"
   suffix = random_id.bucket_suffix.hex
   
   # Trim prefix to guarantee suffix and function tokens remain intact

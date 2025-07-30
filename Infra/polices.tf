@@ -4,7 +4,7 @@
 // Locals for policy definitions to reduce duplication
 locals {
   // Common policy naming pattern
-  policy_name_prefix = "${var.project_name}-${var.environment}"
+  policy_name_prefix = "${lower(var.project_name)}-${var.environment}"
   policy_name_suffix = random_id.bucket_suffix.hex
 
   // Simple policies that can be consolidated with for_each
@@ -126,7 +126,7 @@ resource "aws_iam_policy" "simple_policies" {
 }
 
 resource "aws_iam_policy" "terraform_kms_provision" {
-  name        = "${var.project_name}-${var.environment}-TerraformKMSProvision-${random_id.bucket_suffix.hex}"
+  name        = "${lower(var.project_name)}-${var.environment}-TerraformKMSProvision-${random_id.bucket_suffix.hex}"
   description = "Allow Terraform to create and tag KMS keys"
 
   policy = jsonencode({
@@ -185,7 +185,7 @@ resource "aws_iam_policy" "terraform_kms_provision" {
 }
 
 resource "aws_iam_policy" "terraform_apigateway_provision" {
-  name        = "${var.project_name}-${var.environment}-TerraformAPIGatewayProvision-${random_id.bucket_suffix.hex}"
+  name        = "${lower(var.project_name)}-${var.environment}-TerraformAPIGatewayProvision-${random_id.bucket_suffix.hex}"
   description = "Allow Terraform to create and tag API Gateway resources"
 
   policy = jsonencode({
@@ -206,7 +206,7 @@ resource "aws_iam_policy" "terraform_apigateway_provision" {
 }
 
 resource "aws_iam_policy" "terraform_iam_provision" {
-  name        = "${var.project_name}-${var.environment}-TerraformIAMProvision-${random_id.bucket_suffix.hex}"
+  name        = "${lower(var.project_name)}-${var.environment}-TerraformIAMProvision-${random_id.bucket_suffix.hex}"
   description = "Allow Terraform to create IAM roles and policies"
 
   policy = jsonencode({
@@ -235,7 +235,7 @@ resource "aws_iam_policy" "terraform_iam_provision" {
 }
 
 resource "aws_iam_policy" "terraform_s3_provision" {
-  name        = "${var.project_name}-${var.environment}-TerraformS3Provision-${random_id.bucket_suffix.hex}"
+  name        = "${lower(var.project_name)}-${var.environment}-TerraformS3Provision-${random_id.bucket_suffix.hex}"
   description = "Allow Terraform to create and configure S3 buckets"
 
   policy = jsonencode({
@@ -279,7 +279,7 @@ resource "aws_iam_policy" "terraform_s3_provision" {
 
 
 resource "aws_iam_policy" "lambda_control" {
-  name        = "${var.project_name}-${var.environment}-AllowLambdaOperations-${random_id.bucket_suffix.hex}"
+  name        = "${lower(var.project_name)}-${var.environment}-AllowLambdaOperations-${random_id.bucket_suffix.hex}"
   description = "Policy to allow operations on Lambda functions"
 
   policy = jsonencode({
@@ -330,7 +330,7 @@ resource "aws_iam_policy" "lambda_control" {
 
 // Lambda-specific runtime execution policy (minimal permissions for Lambda functions only)
 resource "aws_iam_policy" "lambda_runtime_execution" {
-  name        = "${var.project_name}-${var.environment}-LambdaRuntimeExecution-${random_id.bucket_suffix.hex}"
+  name        = "${lower(var.project_name)}-${var.environment}-LambdaRuntimeExecution-${random_id.bucket_suffix.hex}"
   description = "Minimal runtime permissions for Lambda functions"
 
   policy = jsonencode({
@@ -382,7 +382,7 @@ resource "aws_iam_policy" "lambda_runtime_execution" {
 
 // Step Functions-specific runtime execution policy (minimal permissions for orchestration only)
 resource "aws_iam_policy" "step_function_runtime_execution" {
-  name        = "${var.project_name}-${var.environment}-StepFunctionRuntimeExecution-${random_id.bucket_suffix.hex}"
+  name        = "${lower(var.project_name)}-${var.environment}-StepFunctionRuntimeExecution-${random_id.bucket_suffix.hex}"
   description = "Minimal runtime permissions for Step Functions orchestration"
 
   policy = jsonencode({
@@ -424,7 +424,7 @@ resource "aws_iam_policy" "step_function_runtime_execution" {
 
 // Consolidated infrastructure provisioning policy (combines 7 individual policies)
 resource "aws_iam_policy" "terraform_infrastructure_provisioning" {
-  name        = "${var.project_name}-${var.environment}-TerraformInfrastructureProvisioning-${random_id.bucket_suffix.hex}"
+  name        = "${lower(var.project_name)}-${var.environment}-TerraformInfrastructureProvisioning-${random_id.bucket_suffix.hex}"
   description = "Consolidated policy for all Terraform infrastructure provisioning operations"
 
   policy = jsonencode({
@@ -588,7 +588,7 @@ resource "aws_iam_policy" "terraform_infrastructure_provisioning" {
 
 // Consolidated runtime execution policy (combines 6 individual policies)
 resource "aws_iam_policy" "terraform_runtime_execution" {
-  name        = "${var.project_name}-${var.environment}-TerraformRuntimeExecution-${random_id.bucket_suffix.hex}"
+  name        = "${lower(var.project_name)}-${var.environment}-TerraformRuntimeExecution-${random_id.bucket_suffix.hex}"
   description = "Consolidated policy for all Lambda and Step Function runtime operations"
 
   policy = jsonencode({

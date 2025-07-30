@@ -59,7 +59,7 @@ data "aws_iam_policy_document" "lambda_execution_trust" {
     condition {
       test     = "ArnLike"
       variable = "aws:SourceArn"
-      values   = ["arn:aws:lambda:${var.region}:${data.aws_caller_identity.current.account_id}:function:${var.project_name}-${var.environment}-*"]
+      values   = ["arn:aws:lambda:${var.region}:${data.aws_caller_identity.current.account_id}:function:${lower(var.project_name)}-${var.environment}-*"]
     }
   }
 }
@@ -84,14 +84,14 @@ data "aws_iam_policy_document" "step_function_execution_trust" {
     condition {
       test     = "ArnLike"
       variable = "aws:SourceArn"
-      values   = ["arn:aws:states::${var.region}:${data.aws_caller_identity.current.account_id}:stateMachine:*"]
+      values   = ["arn:aws:states:${var.region}:${data.aws_caller_identity.current.account_id}:stateMachine:${lower(var.project_name)}-${var.environment}-*"]
     }
   }
 }
 
 // Deployment role - assumed only by human/CI for infrastructure management
 resource "aws_iam_role" "TerraformDeploymentRole" {
-  name = "${var.project_name}-${var.environment}-TerraformDeploymentRole"
+  name = "${lower(var.project_name)}-${var.environment}-TerraformDeploymentRole"
 
   assume_role_policy = data.aws_iam_policy_document.terraform_deployer_trust.json
 
@@ -103,7 +103,7 @@ resource "aws_iam_role" "TerraformDeploymentRole" {
 
 // Lambda execution role - assumed only by Lambda service for runtime operations
 resource "aws_iam_role" "LambdaExecutionRole" {
-  name = "${var.project_name}-${var.environment}-LambdaExecutionRole"
+  name = "${lower(var.project_name)}-${var.environment}-LambdaExecutionRole"
 
   assume_role_policy = data.aws_iam_policy_document.lambda_execution_trust.json
 
@@ -115,7 +115,7 @@ resource "aws_iam_role" "LambdaExecutionRole" {
 
 // Step Functions execution role - assumed only by Step Functions service
 resource "aws_iam_role" "StepFunctionExecutionRole" {
-  name = "${var.project_name}-${var.environment}-StepFunctionExecutionRole"
+  name = "${lower(var.project_name)}-${var.environment}-StepFunctionExecutionRole"
 
   assume_role_policy = data.aws_iam_policy_document.step_function_execution_trust.json
 

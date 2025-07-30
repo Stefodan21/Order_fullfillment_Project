@@ -12,8 +12,9 @@ variable "project_name" {
   description = "Logical service name used as prefix for all resource names"
   
   validation {
-    condition     = length(var.project_name) <= 20 && can(regex("^[-a-zA-Z0-9_]+$", var.project_name))
-    error_message = "Must be ≤20 chars and contain only letters, numbers, hyphens, or underscores (AWS Lambda limit)."
+    # Force lowercase to stay compatible with the strictest AWS naming rules
+    condition     = length(var.project_name) <= 20 && can(regex("^[a-z0-9-_]+$", lower(var.project_name)))
+    error_message = "Must be ≤20 chars and contain only lowercase letters, numbers, hyphens, or underscores (AWS S3/DynamoDB compatibility)."
   }
 }
 

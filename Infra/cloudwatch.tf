@@ -1,8 +1,8 @@
 // CloudWatch dashboard for monitoring Lambda invocations
 // Provides visibility into function usage and performance
 resource "aws_cloudwatch_dashboard" "cloudwatchMonitoring" {
-    dashboard_name = "OrderProcessingMonitoring"
-    dashboard_body = <<EOF
+  dashboard_name = "OrderProcessingMonitoring"
+  dashboard_body = <<EOF
     {
         "widgets": [
             // Lambda function metrics: start_workflow
