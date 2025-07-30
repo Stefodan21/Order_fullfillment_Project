@@ -1,7 +1,7 @@
 resource "aws_kms_key" "data_encryption" {
   description             = "KMS key for encrypting S3 and DynamoDB"
   deletion_window_in_days = 10
-  enable_key_rotation     = true
+  # enable_key_rotation     = true  # Disabled to avoid permission issues during initial deployment
 
   tags = {
     Environment = var.environment

@@ -60,8 +60,16 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Terraform Init
-        run: terraform init
+        run: |
+          terraform init \
+            -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
+            -backend-config="key=${{ secrets.PROJECT_NAME }}/${{ secrets.ENVIRONMENT }}/${{ secrets.PROJECT_NAME }}.tfstate" \
+            -backend-config="region=${{ secrets.AWS_REGION }}"
         working-directory: Infra
+        env:
+          TF_VAR_iam_group: ${{ secrets.IAM_GROUP }}
+
+          
 
       - name: Terraform Plan
         run: terraform plan

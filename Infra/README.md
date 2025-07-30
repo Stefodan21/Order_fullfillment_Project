@@ -4,6 +4,62 @@ This directory contains Terraform configuration for deploying the Order Fullfill
 
 **Note:** The directory name contains a spelling inconsistency ("fullfillment" vs "fulfillment"). This will be corrected in a future update to avoid breaking existing setups.
 
+## Prerequisites
+
+### 1. Create Terraform State Bucket (One-time setup)
+
+Before running Terraform, you need to create an S3 bucket for storing Terraform state:
+
+```bash
+# Get your AWS account ID and create a unique bucket name
+ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+echo "Your Account ID is: $ACCOUNT_ID"
+
+# Create the state storage bucket
+aws s3 mb s3://tfstatestorage-${ACCOUNT_ID}
+
+# Enable versioning for state file safety
+aws s3api put-bucket-versioning --bucket tfstatestorage-${ACCOUNT_ID} --versioning-configuration Status=Enabled
+
+echo "Created state bucket: tfstatestorage-${ACCOUNT_ID}"
+```
+
+### 2. Configure Terraform Backend
+
+#### Option A: For GitHub Actions (Recommended)
+Configure the backend dynamically using GitHub Secrets. Add these secrets to your repository:
+
+**GitHub Secrets to add:**
+- `TF_STATE_BUCKET`: `tfstatestorage-YOUR_ACCOUNT_ID` (the bucket you created in step 1)
+- `TF_STATE_KEY`: `order-fulfillment/terraform.tfstate` (or any unique path you prefer)
+- `AWS_REGION`: `us-east-1` (or your preferred region)
+
+Then Terraform will be initialized with backend configuration in the workflow:
+
+```yaml
+- name: Terraform Init
+  run: |
+    terraform init \
+      -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
+      -backend-config="key=${{ secrets.TF_STATE_KEY }}" \
+      -backend-config="region=${{ secrets.AWS_REGION }}"
+```
+
+#### Option B: For Local Development
+Update `provider.tf` with your bucket name:
+
+```hcl
+terraform {
+  backend "s3" {
+    bucket = "tfstatestorage-YOUR_ACCOUNT_ID"  # Replace with your actual bucket name
+    key    = "order-fulfillment/terraform.tfstate"
+    region = "us-east-1"
+  }
+}
+```
+
+**Important:** Replace `YOUR_ACCOUNT_ID` with the actual account ID from step 1.
+
 ## Quick Start
 
 1. **Copy the example variables file:**
