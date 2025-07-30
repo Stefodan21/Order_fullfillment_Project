@@ -68,6 +68,7 @@ jobs:
         working-directory: Infra
         env:
           TF_VAR_iam_group: ${{ secrets.IAM_GROUP }}
+          TF_VAR_iam_user: ${{ secrets.IAM_USER }}
 
       # Optional cleanup – only when explicitly requested
       - name: Terraform Destroy (cleanup)
@@ -77,11 +78,13 @@ jobs:
         continue-on-error: false                   # fail fast to stop an unsafe apply
         env:
           TF_VAR_iam_group: ${{ secrets.IAM_GROUP }}
+          TF_VAR_iam_user: ${{ secrets.IAM_USER }}
       - name: Terraform Apply
         run: terraform apply -auto-approve
         working-directory: Infra
         env:
           TF_VAR_iam_group: ${{ secrets.IAM_GROUP }}
+          TF_VAR_iam_user: ${{ secrets.IAM_USER }}
 
       - name: Notify Deployment Success
         run: echo "Deployment was successful!  ✅"
