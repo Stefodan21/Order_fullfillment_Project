@@ -3,7 +3,7 @@
 
 locals {
   # Calculate base prefix length to ensure function names stay under 64 character AWS limit
-  base_prefix = "${var.project_name}-${var.environment}"
+  base_prefix = "${lower(var.project_name)}-${var.environment}"
   suffix = random_id.bucket_suffix.hex
   
   # Function name templates with length validation (AWS Lambda limit: 64 chars)

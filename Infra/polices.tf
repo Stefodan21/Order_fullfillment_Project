@@ -135,7 +135,13 @@ resource "aws_iam_policy" "terraform_kms_provision" {
       {
         Effect = "Allow",
         Action = [
-          "kms:CreateKey",
+          "kms:CreateKey"
+        ],
+        Resource = "*"
+      },
+      {
+        Effect = "Allow",
+        Action = [
           "kms:TagResource",
           "kms:PutKeyPolicy",
           "kms:EnableKeyRotation",
@@ -320,8 +326,7 @@ resource "aws_iam_policy" "lambda_control" {
         Action = [
           "logs:CreateLogGroup",
           "logs:CreateLogStream",
-          "logs:PutLogEvents",
-          "logs:DeleteLogGroup"
+          "logs:PutLogEvents"
         ],
         Resource = "*"
       }
@@ -433,10 +438,17 @@ resource "aws_iam_policy" "terraform_infrastructure_provisioning" {
     Statement = [
       // KMS permissions
       {
-        Sid = "KMSProvisioning",
+        Sid = "KMSKeyCreation",
         Effect = "Allow",
         Action = [
-          "kms:CreateKey",
+          "kms:CreateKey"
+        ],
+        Resource = "*"
+      },
+      {
+        Sid = "KMSKeyManagement",
+        Effect = "Allow",
+        Action = [
           "kms:TagResource",
           "kms:PutKeyPolicy",
           "kms:EnableKeyRotation",
@@ -672,8 +684,7 @@ resource "aws_iam_policy" "terraform_runtime_execution" {
         Action = [
           "logs:CreateLogGroup",
           "logs:CreateLogStream",
-          "logs:PutLogEvents",
-          "logs:DeleteLogGroup"
+          "logs:PutLogEvents"
         ],
         Resource = "*"
       }

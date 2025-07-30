@@ -13,8 +13,12 @@ variable "project_name" {
   
   validation {
     # Force lowercase to stay compatible with the strictest AWS naming rules
-    condition     = length(var.project_name) <= 20 && can(regex("^[a-z0-9-_]+$", lower(var.project_name)))
-    error_message = "Must be ≤20 chars and contain only lowercase letters, numbers, hyphens, or underscores (AWS S3/DynamoDB compatibility)."
+    condition = (
+      length(var.project_name) <= 20
+      && var.project_name == lower(var.project_name)            # ensure caller supplied lowercase
+      && can(regex("^[a-z0-9-]+$", var.project_name))           # drop "_" – S3 buckets disallow it
+    )
+    error_message = "Must be ≤20 chars and contain only lowercase letters, numbers, hyphens (AWS S3/DynamoDB compatibility). No uppercase letters or underscores allowed."
   }
 }
 
