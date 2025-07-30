@@ -1,8 +1,23 @@
 // Lambda function definitions for the order fulfillment workflow
 // Includes functions for starting workflow, order validation, invoice generation, shipping suggestion, and order tracking
 
+locals {
+  # Calculate base prefix length to ensure function names stay under 64 character AWS limit
+  base_prefix = "${var.project_name}-${var.environment}"
+  suffix = random_id.bucket_suffix.hex
+  
+  # Function name templates with length validation (AWS Lambda limit: 64 chars)
+  function_names = {
+    start_workflow        = substr("${local.base_prefix}-startWorkflow", 0, 64)
+    validate_order       = substr("${local.base_prefix}-OrderValidation-${local.suffix}", 0, 64)
+    generate_invoice     = substr("${local.base_prefix}-InvoiceGenerator", 0, 64)
+    shipping_suggestion  = substr("${local.base_prefix}-ShippingSuggestion", 0, 64)
+    order_status_tracking = substr("${local.base_prefix}-OrderStatusTracking", 0, 64)
+  }
+}
+
 resource "aws_lambda_function" "start_workflow" {
-  function_name =  "${var.project_name}-${var.environment}-startWorkflow"
+  function_name =  local.function_names.start_workflow
   handler       = "StartWorkflow.lambda_handler"
   runtime       = "python3.9"
   role          = aws_iam_role.LambdaExecutionRole.arn
@@ -23,7 +38,7 @@ resource "aws_lambda_function" "start_workflow" {
 
 // lambda function for order validation
 resource "aws_lambda_function" "validate_order" {
-    function_name = "${var.project_name}-${var.environment}-OrderValidation-${random_id.bucket_suffix.hex}"
+    function_name = local.function_names.validate_order
     handler       = "order_validation.lambda_handler"
     runtime       = "python3.9"
     role          = aws_iam_role.LambdaExecutionRole.arn
@@ -39,7 +54,7 @@ resource "aws_lambda_function" "validate_order" {
 
 // lambda function for invoice generation
 resource "aws_lambda_function" "generate_invoice" {
-    function_name = "${var.project_name}-${var.environment}-InvoiceGenerator"
+    function_name = local.function_names.generate_invoice
     handler = "InvoiceGenerator.lambda_handler"
     runtime = "python3.9"
     role = aws_iam_role.LambdaExecutionRole.arn
@@ -55,7 +70,7 @@ resource "aws_lambda_function" "generate_invoice" {
 
 // lambda function for shipping suggestion
 resource "aws_lambda_function" "shipping_suggestion" {
-    function_name = "${var.project_name}-${var.environment}-ShippingSuggestion"
+    function_name = local.function_names.shipping_suggestion
     handler = "ShippingSuggestion.lambda_handler"
     runtime = "python3.9"
     role = aws_iam_role.LambdaExecutionRole.arn
@@ -71,12 +86,12 @@ resource "aws_lambda_function" "shipping_suggestion" {
 
 // lambda function for order status tracking
 resource "aws_lambda_function" "order_status_tracking" {
-    function_name = "${var.project_name}-${var.environment}-OrderStatusTracking"
+    function_name = local.function_names.order_status_tracking
     handler = "OrderStatusTracking.lambda_handler"
     runtime = "python3.9"
     role = aws_iam_role.LambdaExecutionRole.arn
     filename = "${path.module}/order_status_tracking.zip"
-    source_code_hash = filebase64sha256("order_status_tracking.zip")
+    source_code_hash = filebase64sha256("${path.module}/order_status_tracking.zip")
     
     tags = {
       Environment = var.environment

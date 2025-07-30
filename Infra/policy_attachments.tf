@@ -1,22 +1,38 @@
 // Policy attachments following least-privilege principle
 // Separate roles for deployment vs runtime execution to prevent privilege escalation
 
-// Deployment role - only for infrastructure provisioning (human/CI access)
-resource "aws_iam_role_policy_attachment" "terraform_infrastructure_provisioning" {
-  role       = aws_iam_role.TerraformDeploymentRole.name
-  policy_arn = aws_iam_policy.terraform_infrastructure_provisioning.arn
+locals {
+  # Map of role-policy attachments for consistent lifecycle management
+  policy_attachments = {
+    terraform_infrastructure = {
+      role       = aws_iam_role.TerraformDeploymentRole.name
+      policy_arn = aws_iam_policy.terraform_infrastructure_provisioning.arn
+      description = "Deployment role - infrastructure provisioning (human/CI access)"
+    }
+    lambda_runtime = {
+      role       = aws_iam_role.LambdaExecutionRole.name
+      policy_arn = aws_iam_policy.lambda_runtime_execution.arn
+      description = "Lambda execution role - minimal runtime permissions only"
+    }
+    step_function_runtime = {
+      role       = aws_iam_role.StepFunctionExecutionRole.name
+      policy_arn = aws_iam_policy.step_function_runtime_execution.arn
+      description = "Step Functions execution role - minimal orchestration permissions only"
+    }
+  }
 }
 
-// Lambda execution role - minimal runtime permissions only
-resource "aws_iam_role_policy_attachment" "lambda_runtime_execution" {
-  role       = aws_iam_role.LambdaExecutionRole.name
-  policy_arn = aws_iam_policy.lambda_runtime_execution.arn
-}
-
-// Step Functions execution role - minimal orchestration permissions only
-resource "aws_iam_role_policy_attachment" "step_function_runtime_execution" {
-  role       = aws_iam_role.StepFunctionExecutionRole.name
-  policy_arn = aws_iam_policy.step_function_runtime_execution.arn
+// Consolidated policy attachments using for_each
+resource "aws_iam_role_policy_attachment" "policy_attachments" {
+  for_each = local.policy_attachments
+  
+  role       = each.value.role
+  policy_arn = each.value.policy_arn
+  
+  # Consistent lifecycle management for all attachments
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 // Total: 3 policies across 3 roles (all under AWS 10-policy limit)

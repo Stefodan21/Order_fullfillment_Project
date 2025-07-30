@@ -13,22 +13,28 @@ data "aws_iam_policy_document" "terraform_deployer_trust" {
     }
     actions = ["sts:AssumeRole"]
     
-    # Optional: Add IP restrictions for enhanced security
-    condition {
-      test     = "IpAddress"
-      variable = "aws:SourceIp"
-      values   = [
-        # "203.0.113.0/24",  # Your office IP range
-        # "198.51.100.0/24"  # GitHub Actions IP range (if using self-hosted runners)
-      ]
-    }
+    # Optional security conditions - commented out for GitHub secrets workflow
+    # Uncomment and configure variables if you want to add IP/MFA restrictions
     
-    # Optional: Add MFA requirement
-    condition {
-      test     = "Bool"
-      variable = "aws:MultiFactorAuthPresent"
-      values   = ["true"]
-    }
+    # # IP restrictions - only applies when allowed_ip_ranges is not empty
+    # dynamic "condition" {
+    #   for_each = length(var.allowed_ip_ranges) > 0 ? [1] : []
+    #   content {
+    #     test     = "IpAddress"
+    #     variable = "aws:SourceIp"
+    #     values   = var.allowed_ip_ranges
+    #   }
+    # }
+    
+    # # MFA requirement - only applies when require_mfa is true
+    # dynamic "condition" {
+    #   for_each = var.require_mfa ? [1] : []
+    #   content {
+    #     test     = "Bool"
+    #     variable = "aws:MultiFactorAuthPresent"
+    #     values   = ["true"]
+    #   }
+    # }
   }
 }
 
@@ -41,6 +47,26 @@ data "aws_iam_policy_document" "lambda_execution_trust" {
       identifiers = ["lambda.amazonaws.com"]
     }
     actions = ["sts:AssumeRole"]
+    
+    # Security conditions to prevent cross-account access and confused-deputy attacks
+    condition {
+      test     = "StringEquals"
+      variable = "aws:SourceAccount"
+      values   = [data.aws_caller_identity.current.account_id]
+    }
+    
+    # Additional restriction to specific Lambda functions only
+    condition {
+      test     = "ArnEquals"
+      variable = "aws:SourceArn"
+      values   = [
+        aws_lambda_function.start_workflow.arn,
+        aws_lambda_function.validate_order.arn,
+        aws_lambda_function.generate_invoice.arn,
+        aws_lambda_function.shipping_suggestion.arn,
+        aws_lambda_function.order_status_tracking.arn
+      ]
+    }
   }
 }
 
@@ -53,6 +79,19 @@ data "aws_iam_policy_document" "step_function_execution_trust" {
       identifiers = ["states.amazonaws.com"]
     }
     actions = ["sts:AssumeRole"]
+    
+    # Security conditions to prevent cross-account access
+    condition {
+      test     = "StringEquals"
+      variable = "aws:SourceAccount"
+      values   = [data.aws_caller_identity.current.account_id]
+    }
+    
+    condition {
+      test     = "ArnEquals"
+      variable = "aws:SourceArn"
+      values   = [aws_sfn_state_machine.OrderFullfillment.arn]
+    }
   }
 }
 

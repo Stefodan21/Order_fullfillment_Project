@@ -1,27 +1,127 @@
 // IAM policies for DynamoDB, Lambda, S3, and Step Functions access
 // Each policy grants specific permissions required by the workflow components
-resource "aws_iam_policy" "order_table_access" {
-  name        = "${var.project_name}-${var.environment}-AllowOrderTableOperations-${random_id.bucket_suffix.hex}"
-  description = "Policy to allow operations on the Order table in DynamoDB"
-  
+
+// Locals for policy definitions to reduce duplication
+locals {
+  // Common policy naming pattern
+  policy_name_prefix = "${var.project_name}-${var.environment}"
+  policy_name_suffix = random_id.bucket_suffix.hex
+
+  // Simple policies that can be consolidated with for_each
+  simple_policies = {
+    order_table_access = {
+      description = "Policy to allow operations on the Order table in DynamoDB"
+      policy_suffix = "AllowOrderTableOperations"
+      statements = [
+        {
+          Sid    = "OrderTableAccess"
+          Effect = "Allow"
+          Action = [
+            "dynamodb:GetItem",
+            "dynamodb:PutItem", 
+            "dynamodb:UpdateItem",
+            "dynamodb:Query"
+          ]
+          Resource = [
+            aws_dynamodb_table.orders.arn,
+            "${aws_dynamodb_table.orders.arn}/index/*"
+          ]
+        }
+      ]
+    }
+
+    invoice_s3_upload = {
+      description = "Policy to allow uploading invoices to S3"
+      policy_suffix = "AllowS3InvoiceUpload"
+      statements = [
+        {
+          Effect = "Allow"
+          Action = ["s3:PutObject"]
+          Resource = "${aws_s3_bucket.invoice_storage.arn}/*"
+        }
+      ]
+    }
+
+    invoice_s3_location = {
+      description = "Policy to allow S3 bucket location access"
+      policy_suffix = "AllowS3InvoiceLocationAccess"
+      statements = [
+        {
+          Effect = "Allow"
+          Action = ["s3:GetBucketLocation"]
+          Resource = aws_s3_bucket.invoice_storage.arn
+        }
+      ]
+    }
+
+    invoice_s3_list = {
+      description = "Policy to allow listing invoice bucket"
+      policy_suffix = "AllowS3InvoiceList"
+      statements = [
+        {
+          Effect = "Allow"
+          Action = ["s3:ListBucket"]
+          Resource = aws_s3_bucket.invoice_storage.arn
+        }
+      ]
+    }
+
+    cloudwatch_logs_write = {
+      description = "Policy to allow writing logs to CloudWatch"
+      policy_suffix = "AllowCloudWatchLogsWrite"
+      statements = [
+        {
+          Effect = "Allow"
+          Action = [
+            "logs:CreateLogGroup",
+            "logs:CreateLogStream",
+            "logs:PutLogEvents"
+          ]
+          Resource = "arn:aws:logs:us-east-1:*:*"
+        }
+      ]
+    }
+
+    stepfunctions_exec = {
+      description = "Policy to allow execution of a specific state machine"
+      policy_suffix = "AllowStepFunctionsExecution"
+      statements = [
+        {
+          Effect = "Allow"
+          Action = [
+            "states:StartExecution",
+            "states:DescribeExecution",
+            "states:GetExecutionHistory"
+          ]
+          Resource = aws_sfn_state_machine.OrderFullfillment.arn
+        }
+      ]
+    }
+
+    assume_deployment_role = {
+      description = "Allows assuming TerraformDeploymentRole"
+      policy_suffix = "AssumeDeploymentRolePolicy"
+      statements = [
+        {
+          Effect = "Allow"
+          Action = ["sts:AssumeRole"]
+          Resource = aws_iam_role.TerraformDeploymentRole.arn
+        }
+      ]
+    }
+  }
+}
+
+// Consolidated simple policies using for_each
+resource "aws_iam_policy" "simple_policies" {
+  for_each = local.simple_policies
+
+  name        = "${local.policy_name_prefix}-${each.value.policy_suffix}-${local.policy_name_suffix}"
+  description = each.value.description
+
   policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Sid    = "OrderTableAccess",
-        Effect = "Allow",
-        Action = [
-          "dynamodb:GetItem",
-          "dynamodb:PutItem",
-          "dynamodb:UpdateItem",
-          "dynamodb:Query"
-        ],
-        Resource = [
-          aws_dynamodb_table.orders.arn,
-          "${aws_dynamodb_table.orders.arn}/index/*"
-        ]
-      }
-    ]
+    Version   = "2012-10-17"
+    Statement = each.value.statements
   })
 }
 
@@ -40,11 +140,19 @@ resource "aws_iam_policy" "terraform_kms_provision" {
           "kms:PutKeyPolicy",
           "kms:EnableKeyRotation",
           "kms:GetKeyRotationStatus",
-          "kms:DescribeKey",
-          "kms:UpdateAlias"
+          "kms:DescribeKey"
         ],
         Resource = [
           aws_kms_key.data_encryption.arn
+        ]
+      },
+      {
+        Effect = "Allow",
+        Action = [
+          "kms:UpdateAlias"
+        ],
+        Resource = [
+          aws_kms_alias.data_encryption_alias.arn
         ]
       },
       {
@@ -137,7 +245,13 @@ resource "aws_iam_policy" "terraform_s3_provision" {
         Effect = "Allow",
         Action = [
           "s3:CreateBucket",
-          "s3:DeleteBucket",
+          "s3:DeleteBucket"
+        ],
+        Resource = "*"
+      },
+      {
+        Effect = "Allow",
+        Action = [
           "s3:PutBucketPolicy",
           "s3:DeleteBucketPolicy",
           "s3:PutBucketTagging",
@@ -147,9 +261,7 @@ resource "aws_iam_policy" "terraform_s3_provision" {
           "s3:GetEncryptionConfiguration",
           "s3:ListBucket"
         ],
-        Resource = [
-          aws_s3_bucket.invoice_storage.arn
-        ]
+        Resource = aws_s3_bucket.invoice_storage.arn
       },
       {
         Effect = "Allow",
@@ -174,15 +286,22 @@ resource "aws_iam_policy" "lambda_control" {
     Version = "2012-10-17",
     Statement = [
       {
-        Sid    = "LambdaOps",
+        Sid    = "LambdaGlobalActions",
         Effect = "Allow",
         Action = [
           "lambda:CreateFunction",
+          "lambda:ListFunctions"
+        ],
+        Resource = "*"
+      },
+      {
+        Sid    = "LambdaFunctionOps",
+        Effect = "Allow",
+        Action = [
           "lambda:UpdateFunctionCode",
           "lambda:InvokeFunction",
           "lambda:DeleteFunction",
           "lambda:GetFunction",
-          "lambda:ListFunctions",
           "lambda:UpdateFunctionConfiguration"
         ],
         Resource = [
@@ -300,183 +419,9 @@ resource "aws_iam_policy" "step_function_runtime_execution" {
   })
 }
 
-resource "aws_iam_policy" "invoice_s3_upload" {
-  name        = "${var.project_name}-${var.environment}-AllowS3InvoiceUpload-${random_id.bucket_suffix.hex}"
-  description = "Policy to allow uploading invoices to S3"
-
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Effect = "Allow",
-        Action = ["s3:PutObject"],
-        Resource = "${aws_s3_bucket.invoice_storage.arn}/*"
-      }
-    ]
-  })
-}
-
-resource "aws_iam_policy" "invoice_s3_location" {
-  name        = "${var.project_name}-${var.environment}-AllowS3InvoiceLocationAccess-${random_id.bucket_suffix.hex}"
-  description = "Policy to allow S3 bucket location access"
-
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Effect = "Allow",
-        Action = ["s3:GetBucketLocation"],
-        Resource = aws_s3_bucket.invoice_storage.arn
-      }
-    ]
-  })
-}
-
-resource "aws_iam_policy" "invoice_s3_list" {
-  name        = "${var.project_name}-${var.environment}-AllowS3InvoiceList-${random_id.bucket_suffix.hex}"
-  description = "Policy to allow listing invoice bucket"
-
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Effect = "Allow",
-        Action = ["s3:ListBucket"],
-        Resource = aws_s3_bucket.invoice_storage.arn
-      }
-    ]
-  })
-}
-
-resource "aws_iam_policy" "cloudwatch_logs_write" {
-  name        = "${var.project_name}-${var.environment}-AllowCloudWatchLogsWrite-${random_id.bucket_suffix.hex}"
-  description = "Policy to allow writing logs to CloudWatch"
-
-  policy = jsonencode({
-    Version   = "2012-10-17",
-    Statement = [{
-      Effect   = "Allow",
-      Action   = [
-        "logs:CreateLogGroup",
-        "logs:CreateLogStream",
-        "logs:PutLogEvents"
-      ],
-      Resource = "arn:aws:logs:us-east-1:*:*"
-    }]
-  })
-}
-
-resource "aws_iam_policy" "stepfunctions_exec" {
-  name        = "${var.project_name}-${var.environment}-AllowStepFunctionsExecution-${random_id.bucket_suffix.hex}"
-  description = "Policy to allow execution of a specific state machine"
-
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Effect = "Allow",
-        Action = [
-          "states:StartExecution",
-          "states:DescribeExecution",
-          "states:GetExecutionHistory"
-        ],
-        Resource = aws_sfn_state_machine.OrderFullfillment.arn
-      }
-    ]
-  })
-}
 
 
-resource "aws_iam_policy" "assume_deployment_role" {
-  name        = "${var.project_name}-${var.environment}-AssumeDeploymentRolePolicy-${random_id.bucket_suffix.hex}"
-  description = "Allows assuming TerraformDeploymentRole"
 
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Effect = "Allow",
-        Action = ["sts:AssumeRole"],
-        Resource = aws_iam_role.TerraformDeploymentRole.arn
-      }
-    ]
-  })
-}
-
-resource "aws_iam_policy" "terraform_dynamodb_provision" {
-  name        = "${var.project_name}-${var.environment}-TerraformDynamoDBProvision-${random_id.bucket_suffix.hex}"
-  description = "Allow Terraform to create and delete DynamoDB tables"
-
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Effect = "Allow",
-        Action = [
-          "dynamodb:CreateTable",
-          "dynamodb:DeleteTable",
-          "dynamodb:DescribeTable",
-          "dynamodb:UpdateTable",
-          "dynamodb:TagResource",
-          "dynamodb:UntagResource",
-          "dynamodb:ListTagsOfResource"
-        ],
-        Resource = "*"
-      }
-    ]
-  })
-}
-
-resource "aws_iam_policy" "terraform_stepfunctions_provision" {
-  name        = "${var.project_name}-${var.environment}-TerraformStepFunctionsProvision-${random_id.bucket_suffix.hex}"
-  description = "Allow Terraform to create and delete Step Functions"
-
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Effect = "Allow",
-        Action = [
-          "states:CreateStateMachine",
-          "states:DeleteStateMachine",
-          "states:DescribeStateMachine",
-          "states:UpdateStateMachine",
-          "states:TagResource",
-          "states:UntagResource",
-          "states:ListTagsForResource"
-        ],
-        Resource = "*"
-      }
-    ]
-  })
-}
-
-resource "aws_iam_policy" "terraform_lambda_provision" {
-  name        = "${var.project_name}-${var.environment}-TerraformLambdaProvision-${random_id.bucket_suffix.hex}"
-  description = "Allow Terraform to create and delete Lambda functions"
-
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Effect = "Allow",
-        Action = [
-          "lambda:CreateFunction",
-          "lambda:DeleteFunction",
-          "lambda:UpdateFunctionCode",
-          "lambda:UpdateFunctionConfiguration",
-          "lambda:GetFunction",
-          "lambda:ListFunctions",
-          "lambda:AddPermission",
-          "lambda:RemovePermission",
-          "lambda:TagResource",
-          "lambda:UntagResource"
-        ],
-        Resource = "*"
-      }
-    ]
-  })
-}
 
 // Consolidated infrastructure provisioning policy (combines 7 individual policies)
 resource "aws_iam_policy" "terraform_infrastructure_provisioning" {
@@ -496,17 +441,17 @@ resource "aws_iam_policy" "terraform_infrastructure_provisioning" {
           "kms:PutKeyPolicy",
           "kms:EnableKeyRotation",
           "kms:GetKeyRotationStatus",
-          "kms:DescribeKey",
-          "kms:UpdateAlias"
+          "kms:DescribeKey"
         ],
         Resource = aws_kms_key.data_encryption.arn
       },
       {
-        Sid = "KMSAliasProvisioning",
+        Sid = "KMSAliasManagement",
         Effect = "Allow",
         Action = [
           "kms:CreateAlias",
-          "kms:DeleteAlias"
+          "kms:DeleteAlias",
+          "kms:UpdateAlias"
         ],
         Resource = aws_kms_alias.data_encryption_alias.arn
       },
@@ -556,13 +501,20 @@ resource "aws_iam_policy" "terraform_infrastructure_provisioning" {
         ],
         Resource = "*"
       },
-      // S3 permissions
+      // S3 permissions - split between global and resource-specific actions
+      {
+        Sid = "S3GlobalActions",
+        Effect = "Allow",
+        Action = [
+          "s3:CreateBucket",
+          "s3:DeleteBucket"
+        ],
+        Resource = "*"
+      },
       {
         Sid = "S3BucketProvisioning",
         Effect = "Allow",
         Action = [
-          "s3:CreateBucket",
-          "s3:DeleteBucket",
           "s3:PutBucketPolicy",
           "s3:DeleteBucketPolicy",
           "s3:PutBucketTagging",
@@ -699,17 +651,24 @@ resource "aws_iam_policy" "terraform_runtime_execution" {
         ],
         Resource = aws_sfn_state_machine.OrderFullfillment.arn
       },
-      // Lambda control/invocation
+      // Lambda control/invocation - split between global and function-specific actions
       {
-        Sid = "LambdaRuntime",
+        Sid = "LambdaRuntimeGlobal",
         Effect = "Allow",
         Action = [
           "lambda:CreateFunction",
+          "lambda:ListFunctions"
+        ],
+        Resource = "*"
+      },
+      {
+        Sid = "LambdaRuntimeSpecific",
+        Effect = "Allow",
+        Action = [
           "lambda:UpdateFunctionCode",
           "lambda:InvokeFunction",
           "lambda:DeleteFunction",
           "lambda:GetFunction",
-          "lambda:ListFunctions",
           "lambda:UpdateFunctionConfiguration"
         ],
         Resource = [
