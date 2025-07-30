@@ -10,7 +10,7 @@ resource "aws_kms_key" "data_encryption" {
 }
 
 resource "aws_kms_alias" "data_encryption_alias" {
-  name          = "alias/${var.project_name}-${var.environment}-data-key"
+  name          = "alias/${lower(var.project_name)}-${var.environment}-data-key"
   target_key_id = aws_kms_key.data_encryption.key_id
 }
 

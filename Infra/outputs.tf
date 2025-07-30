@@ -18,7 +18,7 @@ output "default_tags" {
     Environment = var.environment
     Project     = var.project_name
     ManagedBy   = "Terraform"
-    
+
   }
 }
 
@@ -44,4 +44,15 @@ output "suggest_shipping_url" {
 }
 output "track_order_url" {
   value = "${local.api_base_url}/trackOrder"
+}
+
+// Consolidated policy outputs for easy reference
+output "simple_policies" {
+  description = "Map of consolidated simple policies for easy reference"
+  value = {
+    for k, v in aws_iam_policy.simple_policies : k => {
+      name = v.name
+      arn  = v.arn
+    }
+  }
 }
