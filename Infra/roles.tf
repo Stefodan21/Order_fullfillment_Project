@@ -9,7 +9,7 @@ data "aws_iam_policy_document" "terraform_deployer_trust" {
     effect = "Allow"
     principals {
       type        = "AWS"
-      identifiers = [var.deployer_principal_arn]
+      identifiers = ["*"]
     }
     actions = ["sts:AssumeRole"]
     
