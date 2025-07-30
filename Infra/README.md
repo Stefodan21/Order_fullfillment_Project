@@ -26,6 +26,26 @@ echo "Created state bucket: tfstatestorage-${ACCOUNT_ID}"
 
 ### 2. Configure Terraform Backend
 
+#### Option A: For GitHub Actions (Recommended)
+Configure the backend dynamically using GitHub Secrets. Add these secrets to your repository:
+
+**GitHub Secrets to add:**
+- `TF_STATE_BUCKET`: `tfstatestorage-YOUR_ACCOUNT_ID` (the bucket you created in step 1)
+- `TF_STATE_KEY`: `order-fulfillment/terraform.tfstate` (or any unique path you prefer)
+- `AWS_REGION`: `us-east-1` (or your preferred region)
+
+Then Terraform will be initialized with backend configuration in the workflow:
+
+```yaml
+- name: Terraform Init
+  run: |
+    terraform init \
+      -backend-config="bucket=${{ secrets.TF_STATE_BUCKET }}" \
+      -backend-config="key=${{ secrets.TF_STATE_KEY }}" \
+      -backend-config="region=${{ secrets.AWS_REGION }}"
+```
+
+#### Option B: For Local Development
 Update `provider.tf` with your bucket name:
 
 ```hcl
