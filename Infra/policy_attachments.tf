@@ -20,6 +20,15 @@ locals {
       description = "Step Functions execution role - minimal orchestration permissions only"
     }
   }
+
+  # Group policy attachments for bootstrap access
+  group_policy_attachments = {
+    bootstrap_group_infrastructure = {
+      group       = var.iam_group
+      policy_arn  = aws_iam_policy.terraform_infrastructure_provisioning.arn
+      description = "Bootstrap group - infrastructure provisioning permissions"
+    }
+  }
 }
 
 // Consolidated policy attachments using for_each
@@ -35,5 +44,18 @@ resource "aws_iam_role_policy_attachment" "policy_attachments" {
   }
 }
 
-// Total: 3 policies across 3 roles (all under AWS 10-policy limit)
+// Group policy attachments for bootstrap access
+resource "aws_iam_group_policy_attachment" "group_policy_attachments" {
+  for_each = local.group_policy_attachments
+
+  group      = each.value.group
+  policy_arn = each.value.policy_arn
+
+  # Consistent lifecycle management for all attachments
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+// Total: 3 policies across 3 roles + 1 group policy (all under AWS limits)
 // Security: No privilege escalation possible - runtime services cannot access deployment permissions

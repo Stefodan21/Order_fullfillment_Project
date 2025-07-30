@@ -32,6 +32,17 @@ variable "environment" {
   }
 }
 
+variable "iam_group" {
+  type        = string
+  description = "Name of the IAM group that will receive infrastructure provisioning permissions"
+  default     = "OrderFulfillmentProject"
+  
+  validation {
+    condition     = length(var.iam_group) <= 128 && can(regex("^[a-zA-Z0-9+=,.@_-]+$", var.iam_group))
+    error_message = "IAM group name must be ≤128 chars and contain only alphanumeric characters, plus (+), equal (=), comma (,), period (.), at (@), underscore (_), and hyphen (-)."
+  }
+}
+
 # variable "deployer_principal_arn" {
 #   type        = string
 #   description = "ARN of the IAM principal (user/role) that can assume the TerraformDeploymentRole. Examples: 'arn:aws:iam::123456789012:user/terraform-user' or 'arn:aws:iam::123456789012:role/github-actions-role'"
