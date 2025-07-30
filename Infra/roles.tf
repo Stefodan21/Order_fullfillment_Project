@@ -59,7 +59,7 @@ data "aws_iam_policy_document" "lambda_execution_trust" {
     condition {
       test     = "ArnLike"
       variable = "aws:SourceArn"
-      values   = ["arn:aws:lambda:us-east-1:${data.aws_caller_identity.current.account_id}:function:${var.project_name}-${var.environment}-*"]
+      values   = ["arn:aws:lambda:${var.region}:${data.aws_caller_identity.current.account_id}:function:${var.project_name}-${var.environment}-*"]
     }
   }
 }
@@ -84,7 +84,7 @@ data "aws_iam_policy_document" "step_function_execution_trust" {
     condition {
       test     = "ArnLike"
       variable = "aws:SourceArn"
-      values   = ["arn:aws:states:us-east-1:${data.aws_caller_identity.current.account_id}:stateMachine:*"]
+      values   = ["arn:aws:states::${var.region}:${data.aws_caller_identity.current.account_id}:stateMachine:*"]
     }
   }
 }

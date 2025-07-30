@@ -1,6 +1,8 @@
 # Infrastructure Setup Guide
 
-This directory contains Terraform configuration for deploying the Order Fulfillment infrastructure to AWS.
+This directory contains Terraform configuration for deploying the Order Fullfillment infrastructure to AWS.
+
+**Note:** The directory name contains a spelling inconsistency ("fullfillment" vs "fulfillment"). This will be corrected in a future update to avoid breaking existing setups.
 
 ## Quick Start
 
@@ -12,10 +14,12 @@ This directory contains Terraform configuration for deploying the Order Fulfillm
 2. **Edit `terraform.tfvars` with your configuration:**
    ```hcl
    deployer_principal_arn = "arn:aws:iam::YOUR_ACCOUNT_ID:user/YOUR_USERNAME"
-   project_name = "order-fulfillment"
+   project_name = "order-fulfillment"  # Correct spelling (single 'l')
    environment = "dev"
    region = "us-east-1"
    ```
+
+   **Note:** Use the correct spelling "fulfillment" (single 'l') to avoid propagating the typo to AWS resources.
 
 3. **Deploy the infrastructure:**
    ```bash
@@ -54,6 +58,31 @@ The Terraform configuration creates:
 - **Least Privilege**: Minimal permissions for each role
 
 ## Troubleshooting
+
+### Directory Name Spelling Issue
+**IMPORTANT:** The current directory name contains a typo: `Order_fullfillment_Project` (double 'l' in "fullfillment").
+
+**To fix this inconsistency:**
+```bash
+# 1. Rename the directory (from project parent folder)
+mv Order_fullfillment_Project Order_fulfillment_Project
+
+# 2. Update any local git remotes if needed
+cd Order_fulfillment_Project
+git remote set-url origin https://github.com/USERNAME/Order_fulfillment_Project
+
+# 3. Recreate virtual environment with correct paths
+rm -rf venv
+python -m venv venv
+source venv/bin/activate  # or venv\Scripts\activate on Windows
+pip install -r requirements.txt
+```
+
+**Files that reference the old spelling:**
+- GitHub repository URLs
+- Virtual environment paths  
+- Project documentation
+- CI/CD configurations (if any)
 
 ### "Invalid deployer_principal_arn"
 Ensure the ARN follows the correct format:

@@ -313,15 +313,14 @@ resource "aws_iam_policy" "lambda_control" {
         ]
         
       },
-      // CloudWatch Logs for both Lambda and Step Functions
+      // CloudWatch Logs for Lambda function operations
       {
-        Sid = "CloudWatchLogsCleanup",
+        Sid = "CloudWatchLogsManagement",
         Effect = "Allow",
         Action = [
           "logs:CreateLogGroup",
           "logs:CreateLogStream",
-          "logs:PutLogEvents",
-          "logs:DeleteLogGroup"
+          "logs:PutLogEvents"
         ],
         Resource = "*"
       }
@@ -672,8 +671,7 @@ resource "aws_iam_policy" "terraform_runtime_execution" {
         Action = [
           "logs:CreateLogGroup",
           "logs:CreateLogStream",
-          "logs:PutLogEvents",
-          "logs:DeleteLogGroup"
+          "logs:PutLogEvents"
         ],
         Resource = "*"
       }
