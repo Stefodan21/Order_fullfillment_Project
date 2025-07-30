@@ -32,15 +32,15 @@ variable "environment" {
   }
 }
 
-variable "deployer_principal_arn" {
-  type        = string
-  description = "ARN of the IAM principal (user/role) that can assume the TerraformDeploymentRole. Examples: 'arn:aws:iam::123456789012:user/terraform-user' or 'arn:aws:iam::123456789012:role/github-actions-role'"
+# variable "deployer_principal_arn" {
+#   type        = string
+#   description = "ARN of the IAM principal (user/role) that can assume the TerraformDeploymentRole. Examples: 'arn:aws:iam::123456789012:user/terraform-user' or 'arn:aws:iam::123456789012:role/github-actions-role'"
   
-  validation {
-    condition = can(regex("^arn:aws:iam::[0-9]{12}:(user|role)/.+", var.deployer_principal_arn))
-    error_message = "The deployer_principal_arn must be a valid IAM user or role ARN format: arn:aws:iam::ACCOUNT:user/USERNAME or arn:aws:iam::ACCOUNT:role/ROLENAME"
-  }
-}
+#   validation {
+#     condition = can(regex("^arn:aws:iam::[0-9]{12}:(user|role)/.+", var.deployer_principal_arn))
+#     error_message = "The deployer_principal_arn must be a valid IAM user or role ARN format: arn:aws:iam::ACCOUNT:user/USERNAME or arn:aws:iam::ACCOUNT:role/ROLENAME"
+#   }
+# }
 
 
 
