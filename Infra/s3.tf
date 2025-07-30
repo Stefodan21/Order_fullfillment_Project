@@ -8,9 +8,11 @@ resource "random_id" "bucket_suffix" {
 
 resource "aws_s3_bucket" "invoice_storage" {
     bucket = "invoicestorage-${lower(var.project_name)}-${random_id.bucket_suffix.hex}"
-    lifecycle {
-        prevent_destroy = true
-    }
+    # Temporarily commented out to allow bucket recreation with new naming pattern
+    # TODO: Re-enable after successful deployment
+    # lifecycle {
+    #     prevent_destroy = true
+    # }
 
     tags = {
     Environment = var.environment

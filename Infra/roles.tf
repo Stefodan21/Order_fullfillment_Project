@@ -84,7 +84,7 @@ data "aws_iam_policy_document" "step_function_execution_trust" {
     condition {
       test     = "ArnLike"
       variable = "aws:SourceArn"
-      values   = ["arn:aws:states:${var.region}:${data.aws_caller_identity.current.account_id}:execution:${lower(var.project_name)}-${var.environment}-*"]
+      values   = ["arn:aws:states:${var.region}:${data.aws_caller_identity.current.account_id}:stateMachine:${lower(var.project_name)}-${var.environment}-*"]
     }
   }
 }
