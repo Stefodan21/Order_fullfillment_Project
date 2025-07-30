@@ -5,7 +5,7 @@ resource "aws_lambda_function" "start_workflow" {
   function_name =  "${var.project_name}-${var.environment}-startWorkflow"
   handler       = "StartWorkflow.lambda_handler"
   runtime       = "python3.9"
-  role          = aws_iam_role.TerraformDeploymentRole.arn
+  role          = aws_iam_role.LambdaExecutionRole.arn
   filename      = "${path.module}/start_workflow.zip"
   source_code_hash = filebase64sha256("${path.module}/start_workflow.zip")
 
@@ -26,9 +26,9 @@ resource "aws_lambda_function" "validate_order" {
     function_name = "${var.project_name}-${var.environment}-OrderValidation-${random_id.bucket_suffix.hex}"
     handler       = "order_validation.lambda_handler"
     runtime       = "python3.9"
-    role          = aws_iam_role.TerraformDeploymentRole.arn
+    role          = aws_iam_role.LambdaExecutionRole.arn
     filename      = "${path.module}/order_validation.zip"
-    source_code_hash = filebase64sha256("order_validation.zip")
+    source_code_hash = filebase64sha256("${path.module}/order_validation.zip")
     
 
       tags = {
@@ -42,9 +42,9 @@ resource "aws_lambda_function" "generate_invoice" {
     function_name = "${var.project_name}-${var.environment}-InvoiceGenerator"
     handler = "InvoiceGenerator.lambda_handler"
     runtime = "python3.9"
-    role = aws_iam_role.TerraformDeploymentRole.arn
+    role = aws_iam_role.LambdaExecutionRole.arn
     filename = "${path.module}/invoice_generator.zip"
-    source_code_hash = filebase64sha256("invoice_generator.zip") 
+    source_code_hash = filebase64sha256("${path.module}/invoice_generator.zip") 
        
 
       tags = {
@@ -58,9 +58,9 @@ resource "aws_lambda_function" "shipping_suggestion" {
     function_name = "${var.project_name}-${var.environment}-ShippingSuggestion"
     handler = "ShippingSuggestion.lambda_handler"
     runtime = "python3.9"
-    role = aws_iam_role.TerraformDeploymentRole.arn
+    role = aws_iam_role.LambdaExecutionRole.arn
     filename = "${path.module}/shipping_suggestion.zip"
-    source_code_hash = filebase64sha256("shipping_suggestion.zip")     
+    source_code_hash = filebase64sha256("${path.module}/shipping_suggestion.zip")     
          
 
       tags = {
@@ -74,7 +74,7 @@ resource "aws_lambda_function" "order_status_tracking" {
     function_name = "${var.project_name}-${var.environment}-OrderStatusTracking"
     handler = "OrderStatusTracking.lambda_handler"
     runtime = "python3.9"
-    role = aws_iam_role.TerraformDeploymentRole.arn
+    role = aws_iam_role.LambdaExecutionRole.arn
     filename = "${path.module}/order_status_tracking.zip"
     source_code_hash = filebase64sha256("order_status_tracking.zip")
     

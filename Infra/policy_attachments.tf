@@ -1,86 +1,23 @@
-// Policy attachments for TerraformDeploymentRole
-// Attaches all necessary Terraform provisioning policies to enable full resource lifecycle management
+// Policy attachments following least-privilege principle
+// Separate roles for deployment vs runtime execution to prevent privilege escalation
 
-resource "aws_iam_role_policy_attachment" "terraform_kms_attach" {
+// Deployment role - only for infrastructure provisioning (human/CI access)
+resource "aws_iam_role_policy_attachment" "terraform_infrastructure_provisioning" {
   role       = aws_iam_role.TerraformDeploymentRole.name
-  policy_arn = aws_iam_policy.terraform_kms_provision.arn
+  policy_arn = aws_iam_policy.terraform_infrastructure_provisioning.arn
 }
 
-resource "aws_iam_role_policy_attachment" "terraform_apigateway_attach" {
-  role       = aws_iam_role.TerraformDeploymentRole.name
-  policy_arn = aws_iam_policy.terraform_apigateway_provision.arn
+// Lambda execution role - minimal runtime permissions only
+resource "aws_iam_role_policy_attachment" "lambda_runtime_execution" {
+  role       = aws_iam_role.LambdaExecutionRole.name
+  policy_arn = aws_iam_policy.lambda_runtime_execution.arn
 }
 
-resource "aws_iam_role_policy_attachment" "terraform_iam_attach" {
-  role       = aws_iam_role.TerraformDeploymentRole.name
-  policy_arn = aws_iam_policy.terraform_iam_provision.arn
+// Step Functions execution role - minimal orchestration permissions only
+resource "aws_iam_role_policy_attachment" "step_function_runtime_execution" {
+  role       = aws_iam_role.StepFunctionExecutionRole.name
+  policy_arn = aws_iam_policy.step_function_runtime_execution.arn
 }
 
-resource "aws_iam_role_policy_attachment" "terraform_s3_attach" {
-  role       = aws_iam_role.TerraformDeploymentRole.name
-  policy_arn = aws_iam_policy.terraform_s3_provision.arn
-}
-
-resource "aws_iam_role_policy_attachment" "terraform_dynamodb_attach" {
-  role       = aws_iam_role.TerraformDeploymentRole.name
-  policy_arn = aws_iam_policy.terraform_dynamodb_provision.arn
-}
-
-resource "aws_iam_role_policy_attachment" "terraform_stepfunctions_attach" {
-  role       = aws_iam_role.TerraformDeploymentRole.name
-  policy_arn = aws_iam_policy.terraform_stepfunctions_provision.arn
-}
-
-resource "aws_iam_role_policy_attachment" "terraform_lambda_attach" {
-  role       = aws_iam_role.TerraformDeploymentRole.name
-  policy_arn = aws_iam_policy.terraform_lambda_provision.arn
-}
-
-// Attach AWS managed policies for additional permissions
-resource "aws_iam_role_policy_attachment" "terraform_deployment_cloudformation" {
-  role       = aws_iam_role.TerraformDeploymentRole.name
-  policy_arn = "arn:aws:iam::aws:policy/AWSCloudFormationFullAccess"
-}
-
-resource "aws_iam_role_policy_attachment" "terraform_deployment_ec2" {
-  role       = aws_iam_role.TerraformDeploymentRole.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2FullAccess"
-}
-
-// Additional runtime policies for TerraformDeploymentRole
-// Consolidating all Lambda and Step Function runtime permissions into single role
-
-resource "aws_iam_role_policy_attachment" "terraform_dynamodb_runtime_attach" {
-  role       = aws_iam_role.TerraformDeploymentRole.name
-  policy_arn = aws_iam_policy.order_table_access.arn
-}
-
-resource "aws_iam_role_policy_attachment" "terraform_s3_upload_attach" {
-  role       = aws_iam_role.TerraformDeploymentRole.name
-  policy_arn = aws_iam_policy.invoice_s3_upload.arn
-}
-
-resource "aws_iam_role_policy_attachment" "terraform_s3_location_attach" {
-  role       = aws_iam_role.TerraformDeploymentRole.name
-  policy_arn = aws_iam_policy.invoice_s3_location.arn
-}
-
-resource "aws_iam_role_policy_attachment" "terraform_s3_list_attach" {
-  role       = aws_iam_role.TerraformDeploymentRole.name
-  policy_arn = aws_iam_policy.invoice_s3_list.arn
-}
-
-resource "aws_iam_role_policy_attachment" "terraform_logs_attach" {
-  role       = aws_iam_role.TerraformDeploymentRole.name
-  policy_arn = aws_iam_policy.cloudwatch_logs_write.arn
-}
-
-resource "aws_iam_role_policy_attachment" "terraform_stepfunction_exec_attach" {
-  role       = aws_iam_role.TerraformDeploymentRole.name
-  policy_arn = aws_iam_policy.stepfunctions_exec.arn
-}
-
-resource "aws_iam_role_policy_attachment" "terraform_lambda_control_attach" {
-  role       = aws_iam_role.TerraformDeploymentRole.name
-  policy_arn = aws_iam_policy.lambda_control.arn
-}
+// Total: 3 policies across 3 roles (all under AWS 10-policy limit)
+// Security: No privilege escalation possible - runtime services cannot access deployment permissions

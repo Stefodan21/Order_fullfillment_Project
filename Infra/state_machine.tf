@@ -2,7 +2,7 @@
 // Orchestrates Lambda functions for validation, invoice generation, shipping, and tracking
 resource "aws_sfn_state_machine" "OrderFullfillment" {
   name     = "${var.project_name}-${var.environment}"
-  role_arn = aws_iam_role.StepFunctionTriggerRole.arn
+  role_arn = aws_iam_role.StepFunctionExecutionRole.arn
 
   definition = <<EOF
 {
