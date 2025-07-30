@@ -29,6 +29,15 @@ locals {
       description = "Bootstrap group - infrastructure provisioning permissions"
     }
   }
+
+  # User policy attachments for direct access
+  user_policy_attachments = {
+    bootstrap_user_infrastructure = {
+      user        = var.iam_user
+      policy_arn  = aws_iam_policy.terraform_infrastructure_provisioning.arn
+      description = "Bootstrap user - direct infrastructure provisioning permissions"
+    }
+  }
 }
 
 // Consolidated policy attachments using for_each
@@ -57,5 +66,18 @@ resource "aws_iam_group_policy_attachment" "group_policy_attachments" {
   }
 }
 
-// Total: 3 policies across 3 roles + 1 group policy (all under AWS limits)
+// User policy attachments for direct access
+resource "aws_iam_user_policy_attachment" "user_policy_attachments" {
+  for_each = local.user_policy_attachments
+
+  user       = each.value.user
+  policy_arn = each.value.policy_arn
+
+  # Consistent lifecycle management for all attachments
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+// Total: 3 policies across 3 roles + 1 group policy + 1 user policy (all under AWS limits)
 // Security: No privilege escalation possible - runtime services cannot access deployment permissions
